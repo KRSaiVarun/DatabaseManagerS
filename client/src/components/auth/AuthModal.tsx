@@ -1,0 +1,390 @@
+import { useState } from "react";
+import { X, Facebook } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebook } from "react-icons/fa";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+
+// Form schemas
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+const adminLoginSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof registerSchema>;
+type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
+
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [activeTab, setActiveTab] = useState<"signin" | "signup" | "admin">("signin");
+  const { login, register, adminLogin, socialLoginHandler } = useAuth();
+
+  // Login form
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // Register form
+  const registerForm = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Admin login form
+  const adminLoginForm = useForm<AdminLoginFormValues>({
+    resolver: zodResolver(adminLoginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const handleLoginSubmit = async (data: LoginFormValues) => {
+    const success = await login(data.email, data.password);
+    if (success) {
+      onClose();
+    }
+  };
+
+  const handleRegisterSubmit = async (data: RegisterFormValues) => {
+    const success = await register(
+      data.name, 
+      data.email, 
+      data.phone || "",
+      data.password, 
+      data.confirmPassword
+    );
+    if (success) {
+      onClose();
+    }
+  };
+
+  const handleAdminLoginSubmit = async (data: AdminLoginFormValues) => {
+    const success = await adminLogin(data.email, data.password);
+    if (success) {
+      onClose();
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    // This would be replaced with actual Google OAuth
+    const token = "google-mock-token";
+    const success = await socialLoginHandler("google", token);
+    if (success) {
+      onClose();
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    // This would be replaced with actual Facebook OAuth
+    const token = "facebook-mock-token";
+    const success = await socialLoginHandler("facebook", token);
+    if (success) {
+      onClose();
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader className="bg-primary text-white p-4 -mx-6 -mt-6 rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-xl font-bold">
+              {activeTab === "signin" 
+                ? "Sign In" 
+                : activeTab === "signup" 
+                  ? "Sign Up" 
+                  : "Admin Login"}
+            </DialogTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onClose}
+              className="text-white hover:bg-primary-dark"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </DialogHeader>
+
+        {activeTab !== "admin" ? (
+          <Tabs 
+            defaultValue="signin" 
+            value={activeTab} 
+            onValueChange={(value) => setActiveTab(value as "signin" | "signup")}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="signin">
+              <Form {...loginForm}>
+                <form onSubmit={loginForm.handleSubmit(handleLoginSubmit)} className="space-y-4">
+                  <FormField
+                    control={loginForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email/Phone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={loginForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter your password" {...field} />
+                        </FormControl>
+                        <p className="text-sm text-primary mt-1 cursor-pointer">
+                          Forgot password?
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full bg-primary hover:bg-primary-dark">
+                    Sign In
+                  </Button>
+                </form>
+              </Form>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white dark:bg-neutral-800 text-neutral-500">
+                    or continue with
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleGoogleLogin}
+                  className="flex items-center justify-center"
+                >
+                  <FcGoogle className="mr-2 h-4 w-4" />
+                  Google
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleFacebookLogin}
+                  className="flex items-center justify-center"
+                >
+                  <FaFacebook className="mr-2 h-4 w-4 text-blue-600" />
+                  Facebook
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <Form {...registerForm}>
+                <form onSubmit={registerForm.handleSubmit(handleRegisterSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone (optional)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter your phone" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={registerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter your email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={registerForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Create a password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={registerForm.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Confirm your password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full bg-primary hover:bg-primary-dark">
+                    Create Account
+                  </Button>
+                </form>
+              </Form>
+              <p className="text-sm text-neutral-500 text-center mt-4">
+                By signing up, you agree to our{" "}
+                <a href="#" className="text-primary">
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a href="#" className="text-primary">
+                  Privacy Policy
+                </a>
+              </p>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <Form {...adminLoginForm}>
+            <form onSubmit={adminLoginForm.handleSubmit(handleAdminLoginSubmit)} className="space-y-4">
+              <FormField
+                control={adminLoginForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter admin email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={adminLoginForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter admin password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full bg-primary hover:bg-primary-dark">
+                Admin Login
+              </Button>
+            </form>
+          </Form>
+        )}
+
+        <div className="px-6 py-3 bg-neutral-100 dark:bg-neutral-800 text-center -mx-6 -mb-6 rounded-b-lg">
+          {activeTab === "admin" ? (
+            <Button 
+              variant="link" 
+              className="text-sm text-primary"
+              onClick={() => setActiveTab("signin")}
+            >
+              Return to User Login
+            </Button>
+          ) : (
+            <Button 
+              variant="link" 
+              className="text-sm text-primary"
+              onClick={() => setActiveTab("admin")}
+            >
+              Admin Login
+            </Button>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
