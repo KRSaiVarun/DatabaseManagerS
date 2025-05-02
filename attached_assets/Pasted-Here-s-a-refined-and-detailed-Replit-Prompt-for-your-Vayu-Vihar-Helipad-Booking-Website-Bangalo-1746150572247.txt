@@ -1,0 +1,150 @@
+Here’s a refined and detailed *Replit Prompt* for your *Vayu Vihar Helipad Booking Website* (Bangalore-only service):  
+
+---
+
+### *Replit Project Prompt: "Vayu Vihar – Helipad Booking Platform"*  
+
+#### *Project Overview*  
+Develop a full-stack *helipad booking website* (exclusively for Bangalore) with:  
+- *Two-tier login system* (User + Admin).  
+- *Google/Facebook OAuth login* support.  
+- *Responsive UI* with light/dark mode toggle.  
+- *SQL Database* for user/admin credentials, bookings, and reports.  
+- *Payment Gateway* (Razorpay/UPI/Net Banking).  
+- *Automated WhatsApp/Email/SMS confirmations*.  
+- *Admin dashboard* for managing helipads, bookings, and analytics.  
+
+---
+
+### *1. Authentication & Entry Page*  
+#### *Login/Signup System*  
+- *Two Separate Login Pages:*  
+  - *User Login:* Standard email/phone + password.  
+  - *Admin Login:* Restricted access to modify helipads, view reports, etc.  
+- *Database Storage:*  
+  - Tables: users (id, name, email, phone, password_hash), admins (id, username, password_hash).  
+  - *Password hashing* (bcrypt).  
+- *Social Login:*  
+  - Integrate *Google/Facebook OAuth* (Firebase/Passport.js).  
+- *Entry Page:*  
+  - Logo + "Vayu Vihar" name.  
+  - Auto-sliding background images.  
+  - Buttons: *Login / Signup* (redirects to respective forms).  
+
+---
+
+### *2. Home Page (After Login)*  
+#### *UI Components:*  
+- *Header:*  
+  - Left: *Sliding sidebar* (hamburger menu) with links to:  
+    - Home, About, Booking, My Bookings, Settings, Help Center, Dashboard.  
+  - Center: *Search bar* (filters helipads/routes).  
+  - Right: *Light/Dark mode toggle* + Back button.  
+- *Hero Section:*  
+  - Background image with overlay.  
+  - Slogan: *"Welcome to Vayu Vihar – Elevate Your Journey!"*  
+  - Buttons: *"Book Now"* (→ Booking Page) + *"My Bookings"*.  
+- *Auto-Sliding Gallery:*  
+  - Showcase helipads, luxury helicopters, etc.  
+- *Partners Section:*  
+  - Logos of aviation partners (e.g., *Blade, Taj Air*).  
+- *Why Choose Us?*  
+  - Bullet points:  
+    - "Exclusive Bangalore Helipads."  
+    - "Instant Confirmation & 24/7 Support."  
+    - "Flexible Custom Routes."  
+- *Footer:*  
+  - About Vayu Vihar (short description).  
+  - *Quick Links* (Home, Booking, Contact).  
+  - *Social Media Icons* (Instagram, Twitter, WhatsApp).  
+
+---
+
+### *3. About Us Page*  
+- *Sections:*  
+  - *Company Story* (text + images).  
+  - *Stats:*  
+    - "X+ Bookings Monthly" (dynamic counter).  
+    - *Graphs/Reports* (weekly/monthly bookings – Admin-only).  
+  - *Team Photos* (optional).  
+
+---
+
+### *4. Booking Page*  
+#### *Two Booking Modes:*  
+1. *Predefined Helipad Booking:*  
+   - User selects from fixed routes (e.g., *Bangalore City → Kempegowda Helipad*).  
+   - Fields: Date, Time, Passenger Details, Payment.  
+2. *Custom Route Booking:*  
+   - User inputs *pickup/drop* locations (Bangalore-only).  
+   - Real-time *availability/price calculator*.  
+
+#### *Post-Booking Flow:*  
+- *Confirmation Receipt:*  
+  - Display: Booking ID, Date, Time, Amount, Helipad Location.  
+  - *Download PDF* / Print option.  
+- *Notifications:*  
+  - *Email* (Nodemailer + Gmail SMTP).  
+  - *WhatsApp* (Twilio API).  
+  - *SMS* (TextLocal/Amazon SNS).  
+
+---
+
+### *5. My Bookings Page*  
+- *Table of All Bookings:*  
+  - Columns: Booking ID, Date, Route, Status (Confirmed/Cancelled).  
+- *Actions:*  
+  - *Cancel Booking* (with refund logic if paid).  
+  - *Re-book* option.  
+
+---
+
+### *6. Help Center Page*  
+- *FAQ Section* (collapsible).  
+- *Live Chatbot:*  
+  - AI Assistant (Dialogflow/OpenAI API) for queries like:  
+    - "How to cancel a booking?"  
+    - "What’s your refund policy?"  
+- *Contact Form* (email support).  
+
+---
+
+### *7. Admin Dashboard*  
+- *Features:*  
+  - Add/Edit *helipad locations* and pricing.  
+  - View *booking analytics* (weekly/monthly reports).  
+  - Manage users (block/reset passwords).  
+
+---
+
+### *Tech Stack Recommendations*  
+| *Component*       | *Technology*                  |  
+|----------------------|---------------------------------|  
+| Frontend            | React.js + Tailwind CSS         |  
+| Backend             | Node.js (Express) / Python (Flask) |  
+| Database            | / MySQL                         |  
+| Auth                | Firebase OAuth + JWT            |  
+| Payments            | Razorpay API                    |  
+| Notifications       | Twilio (WhatsApp), Nodemailer   |  
+| Hosting             | Replit (or Render for backend)  |  
+
+---
+
+### *Deployment Steps in Replit*  
+1. *Setup Database:*  
+   - Create tables (users, bookings, helipads, admins).  
+2. *Build Frontend:*  
+   - Use React for dynamic UI (or HTML/CSS if simpler).  
+3. *Integrate APIs:*  
+   - Payment (Razorpay), WhatsApp (Twilio), Auth (Firebase).  
+4. *Test & Debug:*  
+   - Check booking flow + notifications.  
+
+---
+
+### *Optional Enhancements*  
+- *QR Code Tickets* (for check-in).  
+- *User Reviews/Ratings*.  
+- *Loyalty Program* (discounts for frequent flyers).  
+
+Let me know if you’d like any modifications! 🚁
