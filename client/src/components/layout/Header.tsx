@@ -171,13 +171,21 @@ export default function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Button
-                    variant="outline"
-                    className="border-primary text-primary hover:bg-primary hover:text-white"
-                    onClick={() => toggleAuthModal(true)}
-                  >
-                    Login
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary hover:bg-primary hover:text-white"
+                      onClick={() => toggleAuthModal(true)}
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      className="bg-primary text-white hover:bg-primary/90"
+                      onClick={() => toggleAuthModal(true)}
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
                 )}
               </div>
             </div>

@@ -4,8 +4,6 @@ import HeroSection from "@/components/home/HeroSection";
 import FeaturedHelipads from "@/components/home/FeaturedHelipads";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
 import LuxuryFleet from "@/components/home/LuxuryFleet";
-import BookingSection from "@/components/booking/BookingSection";
-import AboutSection from "@/components/home/AboutSection";
 import Partners from "@/components/home/Partners";
 import Testimonials from "@/components/home/Testimonials";
 import CallToAction from "@/components/home/CallToAction";
@@ -19,8 +17,6 @@ export default function HomePage() {
         <FeaturedHelipads />
         <WhyChooseUs />
         <LuxuryFleet />
-        <BookingSection />
-        <AboutSection />
         <Partners />
         <Testimonials />
         <CallToAction />
