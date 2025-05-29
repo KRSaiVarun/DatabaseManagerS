@@ -81,10 +81,13 @@ interface Helipad {
 interface Route {
   id: number;
   name: string;
-  sourceHelipadId: number;
-  destinationHelipadId: number;
+  sourceLocation: string;
+  destinationLocation: string;
+  sourceHelipadId: number | null;
+  destinationHelipadId: number | null;
   basePrice: number;
   duration: number;
+  distance: number;
 }
 
 export default function BookingPage() {
@@ -118,19 +121,16 @@ export default function BookingPage() {
   // Create booking mutation
   const createBookingMutation = useMutation({
     mutationFn: async (data: BookingFormValues) => {
-      // Find the route based on from/to locations
+      // Try to find matching route by location names
       const selectedRoute = routes?.find(route => {
-        const fromHelipad = helipads?.find(h => h.id === route.sourceHelipadId);
-        const toHelipad = helipads?.find(h => h.id === route.destinationHelipadId);
-        return fromHelipad?.name === data.fromLocation && toHelipad?.name === data.toLocation;
+        return route.sourceLocation.toLowerCase() === data.fromLocation.toLowerCase() && 
+               route.destinationLocation.toLowerCase() === data.toLocation.toLowerCase();
       });
 
-      if (!selectedRoute) {
-        throw new Error("Route not found");
-      }
-
       const bookingPayload = {
-        routeId: selectedRoute.id,
+        fromLocation: data.fromLocation,
+        toLocation: data.toLocation,
+        routeId: selectedRoute?.id || null,
         bookingDate: data.date,
         bookingTime: data.time,
         passengers: parseInt(data.passengers),
@@ -138,9 +138,10 @@ export default function BookingPage() {
         contactEmail: data.contactEmail,
         contactPhone: data.contactPhone,
         paymentMethod: data.paymentMethod,
+        specialRequests: data.specialRequests,
       };
 
-      const res = await apiRequest('POST', '/api/bookings/predefined', bookingPayload);
+      const res = await apiRequest('POST', '/api/bookings/custom', bookingPayload);
       return res.json();
     },
     onSuccess: (data) => {
@@ -281,7 +282,10 @@ export default function BookingPage() {
                         </FormControl>
                         <datalist id="from-locations">
                           {helipads?.map((helipad) => (
-                            <option key={helipad.id} value={helipad.name} />
+                            <option key={`helipad-${helipad.id}`} value={helipad.name} />
+                          ))}
+                          {routes?.map((route) => (
+                            <option key={`route-from-${route.id}`} value={route.sourceLocation} />
                           ))}
                         </datalist>
                         <FormMessage />
@@ -307,7 +311,10 @@ export default function BookingPage() {
                         </FormControl>
                         <datalist id="to-locations">
                           {helipads?.map((helipad) => (
-                            <option key={helipad.id} value={helipad.name} />
+                            <option key={`helipad-${helipad.id}`} value={helipad.name} />
+                          ))}
+                          {routes?.map((route) => (
+                            <option key={`route-to-${route.id}`} value={route.destinationLocation} />
                           ))}
                         </datalist>
                         <FormMessage />
