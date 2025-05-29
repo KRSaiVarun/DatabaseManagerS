@@ -27,6 +27,7 @@ function Router() {
       <Route path="/booking" component={BookingPage} />
       <Route path="/my-bookings" component={MyBookingsPage} />
       <Route path="/profile" component={ProfilePage} />
+      <Route path="/settings" component={ProfilePage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/help" component={HelpCenterPage} />
       
