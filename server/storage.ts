@@ -1,4 +1,4 @@
-import { users, helipads, bookings, helicopters, routes, payments, testimonials, type User, type InsertUser, type Helipad, type InsertHelipad, type Booking, type InsertBooking, type Helicopter, type Route, type Payment, type InsertPayment, type Testimonial, type InsertTestimonial } from "@shared/schema";
+import { users, helipads, bookings, helicopters, routes, payments, testimonials, type User, type InsertUser, type Helipad, type InsertHelipad, type Booking, type InsertBooking, type Helicopter, type Route, type InsertRoute, type Payment, type InsertPayment, type Testimonial, type InsertTestimonial } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -32,6 +32,7 @@ export interface IStorage {
   // Route methods
   getAllRoutes(): Promise<Route[]>;
   getRoute(id: number): Promise<Route | undefined>;
+  createRoute(route: InsertRoute): Promise<Route>;
   
   // Payment methods
   createPayment(payment: InsertPayment): Promise<Payment>;
@@ -157,6 +158,14 @@ export class DatabaseStorage implements IStorage {
   async getRoute(id: number): Promise<Route | undefined> {
     const [route] = await db.select().from(routes).where(eq(routes.id, id));
     return route || undefined;
+  }
+
+  async createRoute(route: InsertRoute): Promise<Route> {
+    const [newRoute] = await db
+      .insert(routes)
+      .values(route)
+      .returning();
+    return newRoute;
   }
 
   async createPayment(payment: InsertPayment): Promise<Payment> {

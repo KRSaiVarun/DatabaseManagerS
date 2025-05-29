@@ -415,6 +415,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to fetch route' });
     }
   });
+
+  // Add new route (Admin only)
+  app.post('/api/admin/routes', requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { name, sourceHelipadId, destinationHelipadId, basePrice, duration } = req.body;
+      
+      if (!name || !sourceHelipadId || !destinationHelipadId || !basePrice || !duration) {
+        return res.status(400).json({ message: 'All fields are required' });
+      }
+      
+      const route = await storage.createRoute({
+        name,
+        sourceHelipadId,
+        destinationHelipadId,
+        basePrice,
+        duration,
+      });
+      
+      res.status(201).json(route);
+    } catch (error) {
+      console.error('Add route error:', error);
+      res.status(500).json({ message: 'Failed to add route' });
+    }
+  });
   
   // ===== BOOKING ROUTES =====
   
