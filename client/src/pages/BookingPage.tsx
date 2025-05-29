@@ -92,6 +92,7 @@ export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState<'details' | 'payment' | 'success'>('details');
   const [bookingData, setBookingData] = useState<any>(null);
   const [showUpiQr, setShowUpiQr] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
 
@@ -185,17 +186,33 @@ export default function BookingPage() {
   }
 
   const onSubmit = (data: BookingFormValues) => {
-    if (data.paymentMethod === 'upi') {
-      setCurrentStep('payment');
-      setShowUpiQr(true);
-    } else {
-      createBookingMutation.mutate(data);
-    }
+    setIsProcessing(true);
+    
+    // Stage 1: Validate booking details
+    setTimeout(() => {
+      if (data.paymentMethod === 'upi') {
+        setCurrentStep('payment');
+        setShowUpiQr(true);
+        setIsProcessing(false);
+      } else {
+        // Stage 2: Process payment
+        setTimeout(() => {
+          createBookingMutation.mutate(data);
+          setIsProcessing(false);
+        }, 1500);
+      }
+    }, 1000);
   };
 
   const handleUpiPaymentComplete = () => {
-    const formData = form.getValues();
-    createBookingMutation.mutate(formData);
+    setIsProcessing(true);
+    
+    // Stage 2: Process UPI payment
+    setTimeout(() => {
+      const formData = form.getValues();
+      createBookingMutation.mutate(formData);
+      setIsProcessing(false);
+    }, 2000);
   };
 
   const calculatePrice = () => {
