@@ -26,17 +26,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthContext";
 
-// Form schemas
+// Form schemas with enhanced validation
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string()
+    .email("Invalid email address")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password must be less than 50 characters"),
 });
 
 const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  name: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .max(50, "Name must be less than 50 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+  email: z.string()
+    .email("Invalid email address")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
+  phone: z.string()
+    .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number")
+    .optional()
+    .or(z.literal("")),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .max(50, "Password must be less than 50 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -44,8 +59,12 @@ const registerSchema = z.object({
 });
 
 const adminLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string()
+    .email("Invalid email address")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
+  password: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password must be less than 50 characters"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;

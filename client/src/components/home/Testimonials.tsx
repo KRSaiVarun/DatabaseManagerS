@@ -94,10 +94,10 @@ export default function Testimonials() {
                 <CardContent className="p-0">
                   <div className="flex items-center mb-4">
                     <div className="w-12 h-12 rounded-full bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-primary font-bold mr-4">
-                      {getInitials(testimonial.user.name)}
+                      {testimonial.user ? getInitials(testimonial.user.name) : 'U'}
                     </div>
                     <div>
-                      <h4 className="font-bold font-heading">{testimonial.user.name}</h4>
+                      <h4 className="font-bold font-heading">{testimonial.user ? testimonial.user.name : 'Verified Customer'}</h4>
                       {renderStars(testimonial.rating)}
                     </div>
                   </div>

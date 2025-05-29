@@ -1,0 +1,55 @@
+Please implement the following updates and improvements across the website:
+
+Home Page Background Video Issue
+
+Resolve the connection problem with the background video on the homepage to ensure it loads and plays smoothly for all users.
+Add "My Bookings" Tab in Sidebar
+
+Introduce a new "My Bookings" tab in the sidebar menu.
+When users click this tab, display their active bookings and canceled bookings separately.
+Ensure this section is accessible only after user login.
+Input Validation
+
+Implement strict input validation on all relevant pages:
+Login and Signup Pages:
+Prevent entries with special characters, numbers, or invalid data in fields like username, email, and password.
+Display appropriate error messages if validation fails, and disable form submission until inputs are valid.
+Booking Page & Other Forms:
+Add validation to prevent invalid inputs such as special characters or numbers in name fields or other text inputs.
+Provide real-time feedback to users for invalid inputs.
+Admin Route Management
+
+When an admin logs in and attempts to add a route with details that already exist:
+Do not add the duplicate route.
+Display a message: "Route already exists."
+Fix All Runtime Errors
+
+Review and fix all runtime errors present across every page to ensure smooth functionality and user experience.
+Payment Page Enhancements
+
+When a user selects the UPI option:
+Display the QR code for payment directly on the same page.
+After the user scans the QR code and completes the payment:
+Show a booking confirmation summary with all relevant details.
+User Profile Management
+
+When a user clicks the "Profile" option:
+Navigate to a profile information page.
+Allow the user to edit their profile details (e.g., username and email).
+Apply changes immediately after the user clicks the "Edit" or "Save" button.
+Booking Cancellation
+
+When a user cancels a booking:
+Mark the booking as canceled.
+Reflect this change in the "My Bookings" tab.
+Also, update the "Cancelled" bookings section in the admin dashboard when the admin clicks on the "Cancelled" button.
+Remove "Book Flight" Tab
+
+Remove the "Book Flight" option from the sidebar menu.
+Default User Details in Booking
+
+When a user logs in or signs up:
+Use their details as defaults in the helipad booking form.
+When selecting the number of passengers (1,2,3,4,5):
+Prompt for passenger names and emails for each passenger, except for the default (logged-in user).
+Consider 1 passenger as the default logged-in user, so no need for additional info for that passenger.
