@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, pgEnum, doublePrecision, numeric } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -76,7 +76,7 @@ export const routes = pgTable("routes", {
   sourceHelipadId: integer("source_helipad_id").notNull().references(() => helipads.id),
   destinationHelipadId: integer("destination_helipad_id").notNull().references(() => helipads.id),
   duration: integer("duration").notNull(), // in minutes
-  distance: integer("distance").notNull(), // in kilometers
+  distance: doublePrecision("distance").notNull(), // in kilometers
   basePrice: integer("base_price").notNull(), // in paisa/cents
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow()
