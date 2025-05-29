@@ -454,41 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Create custom route booking
-  app.post('/api/bookings/custom', requireAuth, async (req: Request, res: Response) => {
-    try {
-      const validation = customBookingSchema.safeParse(req.body);
-      if (!validation.success) {
-        return res.status(400).json({ message: validation.error.errors[0].message });
-      }
-      
-      const userId = req.session.user!.id;
-      const bookingData = validation.data;
-      
-      // Create the booking
-      const booking = await createCustomBooking(userId, bookingData);
-      
-      // Process payment
-      const paymentResult = await processPayment({
-        bookingId: booking.id,
-        amount: booking.totalAmount,
-        paymentMethod: req.body.paymentMethod || 'card',
-      });
-      
-      // Update booking payment status if payment successful
-      if (paymentResult.success) {
-        await storage.updateBookingStatus(booking.id, 'confirmed');
-      }
-      
-      res.status(201).json({ 
-        booking,
-        payment: paymentResult
-      });
-    } catch (error) {
-      console.error('Create custom booking error:', error);
-      res.status(500).json({ message: 'Failed to create booking' });
-    }
-  });
+
   
   // Get user bookings
   app.get('/api/bookings/my-bookings', requireAuth, async (req: Request, res: Response) => {
