@@ -134,9 +134,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateBookingStatus(id: number, status: string): Promise<Booking | undefined> {
+    const validStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      throw new Error(`Invalid status: ${status}. Must be one of: ${validStatuses.join(', ')}`);
+    }
+    
     const [booking] = await db
       .update(bookings)
-      .set({ bookingStatus: status })
+      .set({ bookingStatus: status as 'pending' | 'confirmed' | 'completed' | 'cancelled' })
       .where(eq(bookings.id, id))
       .returning();
     return booking || undefined;

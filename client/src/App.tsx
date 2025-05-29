@@ -25,6 +25,7 @@ function Router() {
       {/* Public routes */}
       <Route path="/" component={HomePage} />
       <Route path="/booking" component={BookingPage} />
+      <Route path="/qr-payment" component={BookingPage} />
       <Route path="/my-bookings" component={MyBookingsPage} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/settings" component={ProfilePage} />
