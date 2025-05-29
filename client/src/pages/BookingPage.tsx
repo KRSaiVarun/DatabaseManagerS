@@ -68,6 +68,7 @@ const bookingSchema = z.object({
   paymentMethod: z.enum(["upi", "card"], {
     required_error: "Please select a payment method",
   }),
+  specialRequests: z.string().optional(),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;

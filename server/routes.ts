@@ -446,6 +446,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // ===== BOOKING ROUTES =====
   
+  // Create custom location booking
+  app.post('/api/bookings/custom', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { fromLocation, toLocation, routeId, bookingDate: requestBookingDate, bookingTime, passengers, contactName, contactEmail, contactPhone, paymentMethod, specialRequests } = req.body;
+      
+      if (!fromLocation || !toLocation || !requestBookingDate || !bookingTime || !passengers) {
+        return res.status(400).json({ message: 'Required fields missing' });
+      }
+      
+      const userId = req.session.user!.id;
+      
+      // Calculate pricing
+      let basePrice = 100000; // Default ₹1000 base price for custom routes
+      let duration = 30; // Default 30 minutes
+      
+      // If a matching route exists, use its pricing
+      if (routeId) {
+        const route = await storage.getRoute(routeId);
+        if (route) {
+          basePrice = route.basePrice;
+          duration = route.duration;
+        }
+      }
+      
+      const totalAmount = Math.round(basePrice * passengers * 1.18); // Add 18% GST
+      
+      // Create booking with correct field names
+      const bookingDateTime = new Date(`${requestBookingDate}T${bookingTime}`);
+      const bookingReference = `VV${Date.now().toString().slice(-6)}`;
+      
+      const booking = await storage.createBooking({
+        userId,
+        customPickupLocation: fromLocation,
+        customDropLocation: toLocation,
+        bookingDate: bookingDateTime,
+        passengers,
+        duration,
+        totalAmount,
+        bookingStatus: 'confirmed',
+        bookingType: 'custom',
+        bookingReference,
+        pickupHelipadId: null,
+        dropHelipadId: null,
+        paymentStatus: true,
+      });
+      
+      // Process payment
+      const paymentResult = await processPayment({
+        bookingId: booking.id,
+        amount: totalAmount,
+        paymentMethod: paymentMethod || 'card',
+      });
+      
+      res.status(201).json({
+        ...booking,
+        payment: paymentResult,
+      });
+    } catch (error) {
+      console.error('Custom booking error:', error);
+      res.status(500).json({ message: 'Failed to create booking' });
+    }
+  });
+  
   // Create predefined route booking
   app.post('/api/bookings/predefined', requireAuth, async (req: Request, res: Response) => {
     try {
