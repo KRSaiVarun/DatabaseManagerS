@@ -264,6 +264,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user profile
+  app.patch('/api/auth/profile', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { name, email, phone } = req.body;
+      const userId = (req.session as any).user!.id;
+      
+      // Validate name contains only letters and spaces
+      if (name && !/^[a-zA-Z\s]+$/.test(name)) {
+        return res.status(400).json({ message: 'Name can only contain letters and spaces' });
+      }
+      
+      // Validate email format
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ message: 'Please enter a valid email format' });
+      }
+      
+      // Validate phone number (Indian format)
+      if (phone && phone !== '' && !/^[6-9]\d{9}$/.test(phone)) {
+        return res.status(400).json({ message: 'Please enter a valid 10-digit Indian mobile number' });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { name, email, phone });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Update session data
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      (req.session as any).user = userWithoutPassword;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error('Update profile error:', error);
+      res.status(500).json({ message: 'Failed to update profile' });
+    }
+  });
+
   // Logout
   app.post('/api/auth/logout', (req: Request, res: Response) => {
     req.session.destroy((err) => {
