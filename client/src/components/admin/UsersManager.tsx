@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { formatDate } from "@/lib/utils";
 
 import {
   Card,
@@ -19,405 +19,242 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Eye,
-  Search,
-  Mail,
-  Phone,
-  Clock,
-  Ban,
-  UserCheck,
-  Lock,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { getInitials } from "@/lib/utils";
+import { Eye, Shield, User, Phone, Mail, Calendar } from "lucide-react";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  role: 'user' | 'admin';
+  authProvider?: string;
+  createdAt: string;
+}
 
 export default function UsersManager() {
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
-  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   // Fetch users
-  const { data: users, isLoading } = useQuery<User[]>({
+  const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
   });
 
-  // Block/Unblock user mutation
-  const blockUserMutation = useMutation({
-    mutationFn: async ({ id, blocked }: { id: number; blocked: boolean }) => {
-      const res = await apiRequest('PATCH', `/api/admin/users/${id}/block`, { blocked });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "User Updated",
-        description: "User status has been successfully updated.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      setIsBlockDialogOpen(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update user",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Reset password mutation
-  const resetPasswordMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const res = await apiRequest('POST', `/api/admin/users/${id}/reset-password`, {});
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Password Reset",
-        description: "A password reset email has been sent to the user.",
-      });
-      setIsResetPasswordDialogOpen(false);
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reset password",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Handle view user details
-  const handleViewUser = (user: User) => {
-    setCurrentUser(user);
-    setIsViewDialogOpen(true);
+  const viewUserDetails = (user: User) => {
+    setSelectedUser(user);
+    setIsDetailsOpen(true);
   };
 
-  // Handle block/unblock user
-  const handleBlockUserClick = (user: User) => {
-    setCurrentUser(user);
-    setIsBlockDialogOpen(true);
-  };
-
-  // Handle reset password
-  const handleResetPasswordClick = (user: User) => {
-    setCurrentUser(user);
-    setIsResetPasswordDialogOpen(true);
-  };
-
-  // Confirm block/unblock user
-  const confirmBlockUser = () => {
-    if (!currentUser) return;
-    
-    // For demo purposes, we're toggling the blocked status
-    // In a real app, you'd check the actual user.blocked property
-    const isCurrentlyBlocked = false; // This would come from the user object
-    
-    blockUserMutation.mutate({ 
-      id: currentUser.id, 
-      blocked: !isCurrentlyBlocked 
-    });
-  };
-
-  // Confirm reset password
-  const confirmResetPassword = () => {
-    if (!currentUser) return;
-    resetPasswordMutation.mutate(currentUser.id);
-  };
-
-  // Filter users based on search term
-  const filteredUsers = users?.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Users Management</h1>
-      </div>
-
+  if (isLoading) {
+    return (
       <Card>
         <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>Manage all registered users</CardDescription>
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-500" />
-            <Input
-              placeholder="Search users..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          <CardTitle>Users Management</CardTitle>
+          <CardDescription>Loading users...</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <User className="h-5 w-5 mr-2" />
+            Users Management
+          </CardTitle>
+          <CardDescription>
+            Manage all registered users and their credentials
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[250px]" />
-                    <Skeleton className="h-4 w-[200px]" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User Details</TableHead>
+                  <TableHead>Contact Information</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Registration</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users.length === 0 ? (
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      <div className="text-muted-foreground">
+                        <User className="h-8 w-8 mx-auto mb-2" />
+                        <p>No users found</p>
+                      </div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers && filteredUsers.length > 0 ? (
-                    filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center space-x-2">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-primary text-white">
-                                {getInitials(user.name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{user.name}</span>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <p className="font-medium">{user.name}</p>
+                          <p className="text-sm text-muted-foreground">ID: {user.id}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm">
+                            <Mail className="h-3 w-3 mr-1" />
+                            {user.email}
                           </div>
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={user.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : ''}>
-                            {user.role === 'admin' ? 'Admin' : 'User'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                            Active
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleViewUser(user)}
-                            className="mr-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            <span className="sr-only">View</span>
-                          </Button>
-                          
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleBlockUserClick(user)}
-                            className="mr-2 text-yellow-500 hover:text-yellow-700 hover:bg-yellow-50 dark:hover:bg-yellow-900/10"
-                          >
-                            <Ban className="h-4 w-4" />
-                            <span className="sr-only">Block</span>
-                          </Button>
-                          
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleResetPasswordClick(user)}
-                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/10"
-                          >
-                            <Lock className="h-4 w-4" />
-                            <span className="sr-only">Reset Password</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-neutral-500">
-                        {searchTerm ? "No users matching your search" : "No users found"}
+                          {user.phone && (
+                            <div className="flex items-center text-sm text-muted-foreground">
+                              <Phone className="h-3 w-3 mr-1" />
+                              {user.phone}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                          {user.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {formatDate(user.createdAt)}
+                          </div>
+                          {user.authProvider && (
+                            <Badge variant="outline" className="text-xs">
+                              {user.authProvider}
+                            </Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => viewUserDetails(user)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-
-          {/* Pagination controls would go here */}
-          {filteredUsers && filteredUsers.length > 0 && (
-            <div className="flex items-center justify-center space-x-2 mt-6">
-              <Button variant="outline" size="icon" disabled>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="px-4">1</Button>
-              <Button variant="outline" size="icon" disabled>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
-      {/* View User Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-md">
+      {/* User Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              Complete information about the selected user
+            </DialogDescription>
           </DialogHeader>
           
-          {currentUser && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-primary text-white text-xl">
-                    {getInitials(currentUser.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-lg font-bold">{currentUser.name}</h3>
-                  <Badge variant="outline" className={currentUser.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : ''}>
-                    {currentUser.role === 'admin' ? 'Admin' : 'User'}
-                  </Badge>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2 text-neutral-500" />
-                  <span>{currentUser.email}</span>
-                </div>
-                
-                {currentUser.phone && (
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-neutral-500" />
-                    <span>{currentUser.phone}</span>
+          {selectedUser && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Basic Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Full Name</label>
+                    <p className="text-sm bg-muted p-2 rounded">{selectedUser.name}</p>
                   </div>
-                )}
-                
-                <div className="flex items-center">
-                  <Clock className="h-4 w-4 mr-2 text-neutral-500" />
-                  <span className="text-sm text-neutral-600 dark:text-neutral-400">
-                    Joined: {new Date(currentUser.createdAt || Date.now()).toLocaleDateString()}
-                  </span>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">User ID</label>
+                    <p className="text-sm bg-muted p-2 rounded">{selectedUser.id}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email Address</label>
+                    <p className="text-sm bg-muted p-2 rounded">{selectedUser.email}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Phone Number</label>
+                    <p className="text-sm bg-muted p-2 rounded">
+                      {selectedUser.phone || 'Not provided'}
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-700">
-                <h4 className="font-medium">Account Status</h4>
-                <div className="flex items-center">
-                  <UserCheck className="h-4 w-4 mr-2 text-green-500" />
-                  <span>Account is active and in good standing</span>
+
+              {/* Account Information */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Account Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Role</label>
+                    <div className="flex items-center">
+                      <Badge variant={selectedUser.role === 'admin' ? 'default' : 'secondary'}>
+                        {selectedUser.role === 'admin' && <Shield className="h-3 w-3 mr-1" />}
+                        {selectedUser.role}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Registration Date</label>
+                    <p className="text-sm bg-muted p-2 rounded">
+                      {formatDate(selectedUser.createdAt)}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Authentication Method</label>
+                    <p className="text-sm bg-muted p-2 rounded">
+                      {selectedUser.authProvider || 'Email/Password'}
+                    </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="flex space-x-2 pt-2">
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setIsViewDialogOpen(false);
-                    // In a real app, you'd navigate to a list of this user's bookings
-                  }}
-                  className="flex-1"
-                >
-                  View Bookings
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => {
-                    setIsViewDialogOpen(false);
-                    setIsBlockDialogOpen(true);
-                  }}
-                  className="flex-1"
-                >
-                  Block User
-                </Button>
+
+              {/* Login Credentials Section (Admin Only) */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-red-600">Secure Information (Admin View)</h4>
+                <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Login Email</label>
+                    <p className="text-sm font-mono bg-red-100 dark:bg-red-900/30 p-2 rounded">
+                      {selectedUser.email}
+                    </p>
+                  </div>
+                  <div className="space-y-2 mt-3">
+                    <label className="text-sm font-medium">Password Status</label>
+                    <p className="text-sm bg-red-100 dark:bg-red-900/30 p-2 rounded">
+                      {selectedUser.authProvider ? 'Social Login (No Password)' : 'Encrypted Password Set'}
+                    </p>
+                  </div>
+                  {selectedUser.role === 'admin' && (
+                    <div className="mt-3 p-3 bg-red-200 dark:bg-red-900/50 rounded">
+                      <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                        ⚠️ Admin Account - Privileged Access
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
-          
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsViewDialogOpen(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Block User Confirmation Dialog */}
-      <AlertDialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Block User?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to block {currentUser?.name}? They will no longer be able to log in or make bookings.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmBlockUser}
-              className="bg-yellow-500 hover:bg-yellow-600"
-            >
-              {blockUserMutation.isPending ? "Processing..." : "Block User"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Reset Password Confirmation Dialog */}
-      <AlertDialog open={isResetPasswordDialogOpen} onOpenChange={setIsResetPasswordDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset Password?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will send a password reset email to {currentUser?.email}. The user will need to create a new password.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmResetPassword}
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              {resetPasswordMutation.isPending ? "Sending..." : "Send Reset Email"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
+    </>
   );
 }
