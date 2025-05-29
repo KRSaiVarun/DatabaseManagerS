@@ -194,17 +194,15 @@ export default function AdminDashboard() {
       return;
     }
 
-    // Create or find matching helipads for the locations
-    const sourceHelipadId = 1; // Default to first helipad for now
-    const destinationHelipadId = 2; // Default to second helipad for now
-
     addRouteMutation.mutate({
       name: routeForm.name,
-      sourceHelipadId: sourceHelipadId,
-      destinationHelipadId: destinationHelipadId,
+      sourceLocation: routeForm.sourceLocation,
+      destinationLocation: routeForm.destinationLocation,
       basePrice: parseInt(routeForm.basePrice),
       duration: parseInt(routeForm.duration),
       distance: parseFloat(routeForm.distance),
+      sourceHelipadId: null,
+      destinationHelipadId: null,
     });
   };
 

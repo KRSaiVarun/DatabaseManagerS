@@ -227,12 +227,10 @@ export default function BookingPage() {
     // Check if there's a matching route
     let basePrice = 0;
     
-    if (routes && helipads) {
+    if (routes) {
       const selectedRoute = routes.find(route => {
-        const fromHelipad = helipads.find(h => h.id === route.sourceHelipadId);
-        const toHelipad = helipads.find(h => h.id === route.destinationHelipadId);
-        return fromHelipad?.name.toLowerCase().includes(fromLocation.toLowerCase()) && 
-               toHelipad?.name.toLowerCase().includes(toLocation.toLowerCase());
+        return route.sourceLocation.toLowerCase().includes(fromLocation.toLowerCase()) && 
+               route.destinationLocation.toLowerCase().includes(toLocation.toLowerCase());
       });
       
       if (selectedRoute) {

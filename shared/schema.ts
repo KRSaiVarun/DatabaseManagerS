@@ -73,8 +73,10 @@ export const helicopters = pgTable("helicopters", {
 export const routes = pgTable("routes", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  sourceHelipadId: integer("source_helipad_id").notNull().references(() => helipads.id),
-  destinationHelipadId: integer("destination_helipad_id").notNull().references(() => helipads.id),
+  sourceLocation: text("source_location").notNull(),
+  destinationLocation: text("destination_location").notNull(),
+  sourceHelipadId: integer("source_helipad_id").references(() => helipads.id),
+  destinationHelipadId: integer("destination_helipad_id").references(() => helipads.id),
   duration: integer("duration").notNull(), // in minutes
   distance: doublePrecision("distance").notNull(), // in kilometers
   basePrice: integer("base_price").notNull(), // in paisa/cents
