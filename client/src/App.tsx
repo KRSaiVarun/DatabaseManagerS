@@ -11,6 +11,7 @@ import BookingPage from "@/pages/BookingPage";
 import MyBookingsPage from "@/pages/MyBookingsPage";
 import AboutPage from "@/pages/AboutPage";
 import HelpCenterPage from "@/pages/HelpCenterPage";
+import ProfilePage from "@/pages/ProfilePage";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminHelipads from "@/pages/admin/AdminHelipads";
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/booking" component={BookingPage} />
       <Route path="/my-bookings" component={MyBookingsPage} />
+      <Route path="/profile" component={ProfilePage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/help" component={HelpCenterPage} />
       

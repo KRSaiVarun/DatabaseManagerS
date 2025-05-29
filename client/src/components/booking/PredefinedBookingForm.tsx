@@ -33,12 +33,28 @@ import {
 import { Input } from '@/components/ui/input';
 import { formatCurrency, calculateGST, calculateTotalWithGST } from '@/lib/utils';
 
-// Form schema
+// Form schema with enhanced validation and passenger details
 const formSchema = z.object({
   routeId: z.string().min(1, 'Please select a route'),
   bookingDate: z.string().min(1, 'Please select a date'),
   bookingTime: z.string().min(1, 'Please select a time'),
   passengers: z.string().min(1, 'Please select number of passengers'),
+  contactName: z.string()
+    .min(2, "Name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+  contactEmail: z.string()
+    .email("Invalid email address")
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
+  contactPhone: z.string()
+    .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
+  passengerDetails: z.array(z.object({
+    name: z.string()
+      .min(2, "Name must be at least 2 characters")
+      .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+    email: z.string()
+      .email("Invalid email address")
+      .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
+  })).optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;

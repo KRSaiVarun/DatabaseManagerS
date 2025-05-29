@@ -240,6 +240,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update profile
+  app.patch('/api/auth/profile', requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { name, email, phone } = req.body;
+      const userId = req.session.user!.id;
+      
+      // Update user profile
+      const updatedUser = await storage.updateUser(userId, { name, email, phone });
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Update session data
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      req.session.user = userWithoutPassword;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ message: 'Failed to update profile' });
+    }
+  });
+  
   // Logout
   app.post('/api/auth/logout', (req: Request, res: Response) => {
     req.session.destroy((err) => {
