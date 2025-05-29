@@ -185,7 +185,7 @@ export default function AdminDashboard() {
   };
 
   const handleAddRoute = () => {
-    if (!routeForm.name || !routeForm.sourceHelipadId || !routeForm.destinationHelipadId || !routeForm.basePrice || !routeForm.duration) {
+    if (!routeForm.name || !routeForm.sourceLocation || !routeForm.destinationLocation || !routeForm.basePrice || !routeForm.duration || !routeForm.distance) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -194,12 +194,17 @@ export default function AdminDashboard() {
       return;
     }
 
+    // Create or find matching helipads for the locations
+    const sourceHelipadId = 1; // Default to first helipad for now
+    const destinationHelipadId = 2; // Default to second helipad for now
+
     addRouteMutation.mutate({
       name: routeForm.name,
-      sourceHelipadId: parseInt(routeForm.sourceHelipadId),
-      destinationHelipadId: parseInt(routeForm.destinationHelipadId),
+      sourceHelipadId: sourceHelipadId,
+      destinationHelipadId: destinationHelipadId,
       basePrice: parseInt(routeForm.basePrice),
       duration: parseInt(routeForm.duration),
+      distance: parseFloat(routeForm.distance),
     });
   };
 

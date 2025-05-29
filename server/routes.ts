@@ -419,9 +419,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add new route (Admin only)
   app.post('/api/admin/routes', requireAdmin, async (req: Request, res: Response) => {
     try {
-      const { name, sourceHelipadId, destinationHelipadId, basePrice, duration } = req.body;
+      const { name, sourceHelipadId, destinationHelipadId, basePrice, duration, distance } = req.body;
       
-      if (!name || !sourceHelipadId || !destinationHelipadId || !basePrice || !duration) {
+      if (!name || !sourceHelipadId || !destinationHelipadId || !basePrice || !duration || !distance) {
         return res.status(400).json({ message: 'All fields are required' });
       }
       
@@ -431,6 +431,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         destinationHelipadId,
         basePrice,
         duration,
+        distance,
+        isActive: true,
       });
       
       res.status(201).json(route);
