@@ -114,10 +114,11 @@ export default function AdminDashboard() {
   // Route form state
   const [routeForm, setRouteForm] = useState({
     name: '',
-    sourceHelipadId: '',
-    destinationHelipadId: '',
+    sourceLocation: '',
+    destinationLocation: '',
     basePrice: '',
     duration: '',
+    distance: '',
   });
 
   useEffect(() => {
@@ -161,10 +162,11 @@ export default function AdminDashboard() {
       setIsAddRouteOpen(false);
       setRouteForm({
         name: '',
-        sourceHelipadId: '',
-        destinationHelipadId: '',
+        sourceLocation: '',
+        destinationLocation: '',
         basePrice: '',
         duration: '',
+        distance: '',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/routes'] });
     },
@@ -356,43 +358,25 @@ export default function AdminDashboard() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="source">Source Helipad</Label>
-                            <Select
-                              value={routeForm.sourceHelipadId}
-                              onValueChange={(value) => setRouteForm({ ...routeForm, sourceHelipadId: value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select source" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {helipads.map((helipad) => (
-                                  <SelectItem key={helipad.id} value={helipad.id.toString()}>
-                                    {helipad.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Label htmlFor="sourceLocation">Source Location</Label>
+                            <Input
+                              id="sourceLocation"
+                              placeholder="e.g., Brigade Road, Bangalore"
+                              value={routeForm.sourceLocation}
+                              onChange={(e) => setRouteForm({ ...routeForm, sourceLocation: e.target.value })}
+                            />
                           </div>
                           <div>
-                            <Label htmlFor="destination">Destination Helipad</Label>
-                            <Select
-                              value={routeForm.destinationHelipadId}
-                              onValueChange={(value) => setRouteForm({ ...routeForm, destinationHelipadId: value })}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select destination" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {helipads.map((helipad) => (
-                                  <SelectItem key={helipad.id} value={helipad.id.toString()}>
-                                    {helipad.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <Label htmlFor="destinationLocation">Destination Location</Label>
+                            <Input
+                              id="destinationLocation"
+                              placeholder="e.g., Electronic City, Bangalore"
+                              value={routeForm.destinationLocation}
+                              onChange={(e) => setRouteForm({ ...routeForm, destinationLocation: e.target.value })}
+                            />
                           </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                           <div>
                             <Label htmlFor="basePrice">Base Price (₹)</Label>
                             <Input
@@ -411,6 +395,16 @@ export default function AdminDashboard() {
                               placeholder="e.g., 30"
                               value={routeForm.duration}
                               onChange={(e) => setRouteForm({ ...routeForm, duration: e.target.value })}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="distance">Distance (km)</Label>
+                            <Input
+                              id="distance"
+                              type="number"
+                              placeholder="e.g., 25.5"
+                              value={routeForm.distance}
+                              onChange={(e) => setRouteForm({ ...routeForm, distance: e.target.value })}
                             />
                           </div>
                         </div>

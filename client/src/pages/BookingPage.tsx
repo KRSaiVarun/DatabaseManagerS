@@ -52,8 +52,8 @@ import {
 
 // Booking form schema
 const bookingSchema = z.object({
-  fromLocation: z.string().min(1, "Please select departure location"),
-  toLocation: z.string().min(1, "Please select arrival location"),
+  fromLocation: z.string().min(1, "Please enter departure location"),
+  toLocation: z.string().min(1, "Please enter arrival location"),
   date: z.string().min(1, "Please select date"),
   time: z.string().min(1, "Please select time"),
   passengers: z.string().min(1, "Please select number of passengers"),
@@ -220,20 +220,32 @@ export default function BookingPage() {
     const toLocation = form.watch('toLocation');
     const passengers = form.watch('passengers');
 
-    if (!fromLocation || !toLocation || !passengers || !routes || !helipads) {
+    if (!fromLocation || !toLocation || !passengers) {
       return 0;
     }
 
-    const selectedRoute = routes.find(route => {
-      const fromHelipad = helipads.find(h => h.id === route.sourceHelipadId);
-      const toHelipad = helipads.find(h => h.id === route.destinationHelipadId);
-      return fromHelipad?.name === fromLocation && toHelipad?.name === toLocation;
-    });
+    // Check if there's a matching route
+    let basePrice = 0;
+    
+    if (routes && helipads) {
+      const selectedRoute = routes.find(route => {
+        const fromHelipad = helipads.find(h => h.id === route.sourceHelipadId);
+        const toHelipad = helipads.find(h => h.id === route.destinationHelipadId);
+        return fromHelipad?.name.toLowerCase().includes(fromLocation.toLowerCase()) && 
+               toHelipad?.name.toLowerCase().includes(toLocation.toLowerCase());
+      });
+      
+      if (selectedRoute) {
+        basePrice = selectedRoute.basePrice;
+      }
+    }
+    
+    // Default pricing for custom routes
+    if (basePrice === 0) {
+      basePrice = 100000; // Default ₹1000 base price
+    }
 
-    if (!selectedRoute) return 0;
-
-    const basePrice = selectedRoute.basePrice;
-    const passengerCount = parseInt(passengers);
+    const passengerCount = parseInt(passengers) || 1;
     const total = basePrice * passengerCount;
     return Math.round(total * 1.18); // Add 18% GST
   };
@@ -262,20 +274,18 @@ export default function BookingPage() {
                           <MapPin className="h-4 w-4 mr-2" />
                           From
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select departure location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {helipads?.map((helipad) => (
-                              <SelectItem key={helipad.id} value={helipad.name}>
-                                {helipad.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter departure location" 
+                            {...field}
+                            list="from-locations"
+                          />
+                        </FormControl>
+                        <datalist id="from-locations">
+                          {helipads?.map((helipad) => (
+                            <option key={helipad.id} value={helipad.name} />
+                          ))}
+                        </datalist>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -290,20 +300,18 @@ export default function BookingPage() {
                           <MapPin className="h-4 w-4 mr-2" />
                           To
                         </FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select arrival location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {helipads?.map((helipad) => (
-                              <SelectItem key={helipad.id} value={helipad.name}>
-                                {helipad.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <Input 
+                            placeholder="Enter arrival location" 
+                            {...field}
+                            list="to-locations"
+                          />
+                        </FormControl>
+                        <datalist id="to-locations">
+                          {helipads?.map((helipad) => (
+                            <option key={helipad.id} value={helipad.name} />
+                          ))}
+                        </datalist>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -505,9 +513,9 @@ export default function BookingPage() {
                   type="submit" 
                   className="w-full" 
                   size="lg"
-                  disabled={createBookingMutation.isPending || calculatePrice() === 0}
+                  disabled={createBookingMutation.isPending || calculatePrice() === 0 || isProcessing}
                 >
-                  {createBookingMutation.isPending ? "Processing..." : "Proceed to Payment"}
+                  {isProcessing ? "Processing..." : createBookingMutation.isPending ? "Processing..." : "Proceed to Payment"}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </form>
