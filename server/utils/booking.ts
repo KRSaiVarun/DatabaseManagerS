@@ -26,7 +26,22 @@ export async function createPredefinedBooking(userId: number, bookingData: any) 
   }
   
   // Calculate booking date (combine date and time)
-  const bookingDateTime = new Date(`${bookingDate}T${bookingTime}`);
+  let bookingDateTime;
+  try {
+    // Handle different date/time formats
+    if (bookingTime && bookingTime.includes(':')) {
+      bookingDateTime = new Date(`${bookingDate}T${bookingTime}:00`);
+    } else {
+      bookingDateTime = new Date(bookingDate);
+    }
+    
+    // Validate the date
+    if (isNaN(bookingDateTime.getTime())) {
+      throw new Error('Invalid date format');
+    }
+  } catch (error) {
+    throw new Error('Invalid booking date or time format');
+  }
   
   // Calculate total amount
   // Base price is per route, we might adjust based on passengers if needed
@@ -75,7 +90,22 @@ export async function createCustomBooking(userId: number, bookingData: any) {
   }
   
   // Calculate booking date (combine date and time)
-  const bookingDateTime = new Date(`${bookingDate}T${bookingTime}`);
+  let bookingDateTime;
+  try {
+    // Handle different date/time formats
+    if (bookingTime && bookingTime.includes(':')) {
+      bookingDateTime = new Date(`${bookingDate}T${bookingTime}:00`);
+    } else {
+      bookingDateTime = new Date(bookingDate);
+    }
+    
+    // Validate the date
+    if (isNaN(bookingDateTime.getTime())) {
+      throw new Error('Invalid date format');
+    }
+  } catch (error) {
+    throw new Error('Invalid booking date or time format');
+  }
   
   // Calculate total amount
   // For custom routes, we calculate based on duration and helicopter type

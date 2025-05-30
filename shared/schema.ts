@@ -119,7 +119,10 @@ export const userLoginSchema = z.object({
   email: z.string()
     .min(1, "Email is required")
     .email("Please enter a valid email address")
-    .max(255, "Email is too long"),
+    .max(255, "Email is too long")
+    .refine((email) => email.endsWith('@gmail.com'), {
+      message: "Only Gmail addresses are allowed",
+    }),
   password: z.string()
     .min(1, "Password is required")
     .max(100, "Password is too long"),
@@ -134,7 +137,10 @@ export const userRegistrationSchema = z.object({
   email: z.string()
     .min(1, "Email is required")
     .email("Please enter a valid email address")
-    .max(255, "Email is too long"),
+    .max(255, "Email is too long")
+    .refine((email) => email.endsWith('@gmail.com'), {
+      message: "Only Gmail addresses are allowed",
+    }),
   phone: z.string()
     .min(1, "Phone number is required")
     .regex(/^[+]?[\d\s-()]{10,15}$/, "Please enter a valid phone number")
