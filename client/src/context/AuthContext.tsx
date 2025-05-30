@@ -141,6 +141,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       // Clear all cached data to prevent data leakage between users
       queryClient.clear();
+      // Redirect to home page after logout
+      setLocation('/');
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
