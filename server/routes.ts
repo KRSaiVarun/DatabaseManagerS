@@ -2,8 +2,8 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { users, bookings, helipads } from "@shared/schema";
-import { sql, eq } from "drizzle-orm";
+import { users, bookings, helipads, payments } from "@shared/schema";
+import { sql, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { 
   userRegistrationSchema, 
@@ -854,10 +854,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'User not found' });
       }
       
-      // Delete user using database query
-      await db.delete(users).where(eq(users.id, userId));
+      // Get all bookings for this user first
+      const userBookings = await db.select({ id: bookings.id }).from(bookings).where(eq(bookings.userId, userId));
       
-      res.json({ message: 'User deleted successfully' });
+      // Delete payments for each booking
+      for (const booking of userBookings) {
+        await db.execute(sql`DELETE FROM payments WHERE booking_id = ${booking.id}`);
+      }
+      
+      // Delete all bookings for this user
+      await db.execute(sql`DELETE FROM bookings WHERE user_id = ${userId}`);
+      
+      // Finally delete the user
+      await db.execute(sql`DELETE FROM users WHERE id = ${userId}`);
+      
+      res.json({ message: 'User and all related data deleted successfully' });
     } catch (error) {
       console.error('Failed to delete user:', error);
       res.status(500).json({ message: 'Failed to delete user' });
@@ -901,10 +912,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Booking not found' });
       }
       
-      // Delete booking using database query
-      await db.delete(bookings).where(eq(bookings.id, bookingId));
+      // First, delete all payments related to this booking
+      await db.execute(sql`DELETE FROM payments WHERE booking_id = ${bookingId}`);
       
-      res.json({ message: 'Booking deleted successfully' });
+      // Then delete the booking
+      await db.execute(sql`DELETE FROM bookings WHERE id = ${bookingId}`);
+      
+      res.json({ message: 'Booking and all related data deleted successfully' });
     } catch (error) {
       console.error('Failed to delete booking:', error);
       res.status(500).json({ message: 'Failed to delete booking' });
