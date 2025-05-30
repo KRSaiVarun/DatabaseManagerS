@@ -1,0 +1,127 @@
+Develop a responsive booking website for Vayu Vihara (a travel service in Bangalore) with end-user and admin dashboards, PostgreSQL integration, and multi-step booking flow.
+
+Key Features & Requirements
+1. Website Structure (Pages)
+Home Page
+
+About Page
+
+Booking Page (Multi-step form)
+
+My Bookings Page (View/Cancel bookings)
+
+Profile Page (Edit personal info & credentials)
+
+Settings Page
+
+Login/Signup Page (No header/footer here)
+
+Header & Footer:
+
+Present on all pages except Login/Signup.
+
+Header:
+
+Left: Logo + "Vayu Vihara"
+
+Right: Login/Signup buttons (replaced by user profile icon after login)
+
+Sidebar (Hamburger Menu): Links to all pages.
+
+Footer: Contact info, social links, copyright.
+
+2. Page-Specific Details
+A. Home Page
+
+Hero section with background image and tagline.
+
+Search bar (users can search for routes).
+
+Brief info about services.
+
+B. About Page
+
+Company mission, team photos, service highlights.
+
+C. Booking Page (4-Step Process)
+
+Route Selection:
+
+From/To (Dropdown with Bangalore locations).
+
+Date, Time, Passengers.
+
+Personal Info: Name, Email, Phone.
+
+Payment:
+
+UPI (Show QR code), Net Banking, Card.
+
+Input validation for card/UPI details.
+
+Confirmation:
+
+Review details.
+
+Animated booking receipt after confirmation.
+
+D. My Bookings Page
+
+List of bookings with Cancel option.
+
+E. Profile Page
+
+Edit personal info, email, password.
+
+F. Settings Page
+
+Theme, notifications preferences.
+
+3. User Roles & Admin Dashboard
+A. End-User Account
+
+Signup → Login → Book rides → Manage bookings.
+
+B. Admin Account
+
+Admin Dashboard Features:
+
+View/Create/Delete users.
+
+Assign roles (Admin/User).
+
+Manage bookings (Cancel/Edit).
+
+Add/Edit routes (From/To, Price, Distance, Time).
+
+Analytics: Total users, revenue, bookings.
+
+4. Technical Requirements
+PostgreSQL Database:
+
+Tables: Users, Bookings, Routes, Payments.
+
+Admin can edit DB via dashboard.
+
+Input Validation:
+
+Email, phone, payment details.
+
+Responsive Design: Works on mobile/desktop.
+
+Security:
+
+Password hashing.
+
+Admin auth protected.
+
+Deliverables
+Fully functional website with all pages.
+
+PostgreSQL integration (sample queries provided).
+
+Role-based access (User + Admin).
+
+Booking flow with 4-step form.
+
+Admin dashboard with CRUD operations.

@@ -67,7 +67,7 @@ const bookingSchema = z.object({
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
   contactPhone: z.string()
     .regex(/^[6-9]\d{9}$/, "Please enter a valid 10-digit Indian mobile number"),
-  paymentMethod: z.enum(["upi", "card"], {
+  paymentMethod: z.enum(["upi"], {
     required_error: "Please select a payment method",
   }),
   specialRequests: z.string().optional(),
@@ -470,24 +470,13 @@ export default function BookingPage() {
                             value={field.value}
                             className="grid grid-cols-1 md:grid-cols-2 gap-4"
                           >
-                            <div className="flex items-center space-x-3 border rounded-lg p-4">
+                            <div className="flex items-center space-x-3 border rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
                               <RadioGroupItem value="upi" id="upi" />
                               <Label htmlFor="upi" className="flex items-center cursor-pointer flex-1">
-                                <Smartphone className="h-5 w-5 mr-3 text-green-500" />
+                                <QrCode className="h-5 w-5 mr-3 text-green-500" />
                                 <div>
                                   <p className="font-medium">UPI Payment</p>
-                                  <p className="text-sm text-neutral-500">Pay using any UPI app</p>
-                                </div>
-                              </Label>
-                            </div>
-                            
-                            <div className="flex items-center space-x-3 border rounded-lg p-4">
-                              <RadioGroupItem value="card" id="card" />
-                              <Label htmlFor="card" className="flex items-center cursor-pointer flex-1">
-                                <CreditCard className="h-5 w-5 mr-3 text-blue-500" />
-                                <div>
-                                  <p className="font-medium">Credit/Debit Card</p>
-                                  <p className="text-sm text-neutral-500">Visa, Mastercard, RuPay</p>
+                                  <p className="text-sm text-neutral-500">Scan QR code using any UPI app</p>
                                 </div>
                               </Label>
                             </div>
@@ -551,15 +540,19 @@ export default function BookingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-6">
-            {/* QR Code placeholder */}
+            {/* UPI QR Code */}
             <div className="flex justify-center">
-              <div className="w-64 h-64 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg flex items-center justify-center bg-white">
-                <div className="text-center">
-                  <QrCode className="h-16 w-16 mx-auto mb-4 text-neutral-400" />
-                  <p className="text-sm text-neutral-500">QR Code</p>
-                  <p className="text-xs text-neutral-400 mt-2">Amount: {formatCurrency(calculatePrice())}</p>
-                </div>
+              <div className="w-64 h-64 border-2 border-green-200 dark:border-green-700 rounded-lg overflow-hidden bg-white">
+                <img 
+                  src={new URL('../assets/upi-qr-code.png', import.meta.url).href}
+                  alt="UPI QR Code for Payment" 
+                  className="w-full h-full object-cover"
+                />
               </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-medium">Amount: {formatCurrency(calculatePrice())}</p>
+              <p className="text-xs text-neutral-500 mt-1">Scan with any UPI app to pay</p>
             </div>
 
             <div className="space-y-2">
