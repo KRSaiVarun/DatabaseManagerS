@@ -906,8 +906,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const bookingId = parseInt(req.params.id);
       
-      // Check if booking exists
-      const booking = await storage.getBooking(bookingId);
+      // Check if booking exists using direct database query
+      const [booking] = await db.select().from(bookings).where(eq(bookings.id, bookingId));
       if (!booking) {
         return res.status(404).json({ message: 'Booking not found' });
       }

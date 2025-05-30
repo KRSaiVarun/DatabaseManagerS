@@ -38,7 +38,7 @@ export default function HeroSection() {
   }, []);
 
   const handleBookingClick = () => {
-    scrollToElement("booking");
+    window.location.href = "/booking";
   };
 
   const handleMyBookingsClick = () => {
