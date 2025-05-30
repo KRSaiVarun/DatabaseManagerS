@@ -824,6 +824,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to fetch users' });
     }
   });
+
+  // Admin: Update user
+  app.patch('/api/admin/users/:id', requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const userData = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, userData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      res.status(500).json({ message: 'Failed to update user' });
+    }
+  });
+
+  // Admin: Delete user
+  app.delete('/api/admin/users/:id', requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      // Delete user using database query
+      await db.delete(users).where(eq(users.id, userId));
+      
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      res.status(500).json({ message: 'Failed to delete user' });
+    }
+  });
   
   // Admin: Get dashboard statistics
   app.get('/api/admin/statistics', requireAdmin, async (req: Request, res: Response) => {

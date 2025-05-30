@@ -203,11 +203,13 @@ export default function AdminDashboard() {
   // User CRUD mutations
   const updateUserMutation = useMutation({
     mutationFn: async (userData: { id: number; data: Partial<User> }) => {
-      const response = await apiRequest(`/api/admin/users/${userData.id}`, {
+      const response = await fetch(`/api/admin/users/${userData.id}`, {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData.data),
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to update user');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
@@ -229,10 +231,11 @@ export default function AdminDashboard() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      const response = await apiRequest(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'DELETE',
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to delete user');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
@@ -255,11 +258,13 @@ export default function AdminDashboard() {
   // Booking CRUD mutations
   const updateBookingMutation = useMutation({
     mutationFn: async (bookingData: { id: number; data: Partial<Booking> }) => {
-      const response = await apiRequest(`/api/admin/bookings/${bookingData.id}`, {
+      const response = await fetch(`/api/admin/bookings/${bookingData.id}`, {
         method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookingData.data),
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to update booking');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
@@ -281,10 +286,11 @@ export default function AdminDashboard() {
 
   const deleteBookingMutation = useMutation({
     mutationFn: async (bookingId: number) => {
-      const response = await apiRequest(`/api/admin/bookings/${bookingId}`, {
+      const response = await fetch(`/api/admin/bookings/${bookingId}`, {
         method: 'DELETE',
       });
-      return response;
+      if (!response.ok) throw new Error('Failed to delete booking');
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
@@ -780,14 +786,32 @@ export default function AdminDashboard() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedBooking(booking)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewBooking(booking)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditBooking(booking)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteBooking(booking)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))
@@ -799,6 +823,246 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* User View Modal */}
+      <Dialog open={isViewUserOpen} onOpenChange={setIsViewUserOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>View user information</DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div>
+                <Label>Name</Label>
+                <p className="font-medium">{selectedUser.name}</p>
+              </div>
+              <div>
+                <Label>Email</Label>
+                <p className="font-medium">{selectedUser.email}</p>
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <p className="font-medium">{selectedUser.phone || 'Not provided'}</p>
+              </div>
+              <div>
+                <Label>Role</Label>
+                <Badge variant={selectedUser.role === 'admin' ? 'default' : 'secondary'}>
+                  {selectedUser.role}
+                </Badge>
+              </div>
+              <div>
+                <Label>Member Since</Label>
+                <p className="font-medium">{new Date(selectedUser.createdAt || '').toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* User Edit Modal */}
+      <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>Update user information</DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editUserData.name || ''}
+                  onChange={(e) => setEditUserData({ ...editUserData, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  value={editUserData.email || ''}
+                  onChange={(e) => setEditUserData({ ...editUserData, email: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={editUserData.phone || ''}
+                  onChange={(e) => setEditUserData({ ...editUserData, phone: e.target.value })}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditUserOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => updateUserMutation.mutate({ id: selectedUser.id, data: editUserData })}
+                  disabled={updateUserMutation.isPending}
+                >
+                  {updateUserMutation.isPending ? 'Updating...' : 'Update User'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* User Delete Modal */}
+      <AlertDialog open={isDeleteUserOpen} onOpenChange={setIsDeleteUserOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this user? This action cannot be undone.
+              {selectedUser && (
+                <div className="mt-2 p-2 bg-neutral-100 rounded">
+                  <strong>{selectedUser.name}</strong> ({selectedUser.email})
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedUser && deleteUserMutation.mutate(selectedUser.id)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Booking View Modal */}
+      <Dialog open={isViewBookingOpen} onOpenChange={setIsViewBookingOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Booking Details</DialogTitle>
+            <DialogDescription>View booking information</DialogDescription>
+          </DialogHeader>
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div>
+                <Label>Booking Reference</Label>
+                <p className="font-medium">{selectedBooking.bookingReference}</p>
+              </div>
+              <div>
+                <Label>Date</Label>
+                <p className="font-medium">{new Date(selectedBooking.bookingDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <Label>Passengers</Label>
+                <p className="font-medium">{selectedBooking.passengers}</p>
+              </div>
+              <div>
+                <Label>Total Amount</Label>
+                <p className="font-medium">{formatCurrency(selectedBooking.totalAmount)}</p>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Badge variant={
+                  selectedBooking.bookingStatus === 'confirmed' ? 'default' :
+                  selectedBooking.bookingStatus === 'pending' ? 'secondary' : 'destructive'
+                }>
+                  {selectedBooking.bookingStatus}
+                </Badge>
+              </div>
+              <div>
+                <Label>Created</Label>
+                <p className="font-medium">{new Date(selectedBooking.createdAt || '').toLocaleDateString()}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Booking Edit Modal */}
+      <Dialog open={isEditBookingOpen} onOpenChange={setIsEditBookingOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Booking</DialogTitle>
+            <DialogDescription>Update booking information</DialogDescription>
+          </DialogHeader>
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-status">Status</Label>
+                <Select
+                  value={editBookingData.bookingStatus || ''}
+                  onValueChange={(value) => setEditBookingData({ ...editBookingData, bookingStatus: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-passengers">Passengers</Label>
+                <Input
+                  id="edit-passengers"
+                  type="number"
+                  value={editBookingData.passengers || ''}
+                  onChange={(e) => setEditBookingData({ ...editBookingData, passengers: parseInt(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-amount">Total Amount</Label>
+                <Input
+                  id="edit-amount"
+                  type="number"
+                  value={editBookingData.totalAmount || ''}
+                  onChange={(e) => setEditBookingData({ ...editBookingData, totalAmount: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditBookingOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => updateBookingMutation.mutate({ id: selectedBooking.id, data: editBookingData })}
+                  disabled={updateBookingMutation.isPending}
+                >
+                  {updateBookingMutation.isPending ? 'Updating...' : 'Update Booking'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Booking Delete Modal */}
+      <AlertDialog open={isDeleteBookingOpen} onOpenChange={setIsDeleteBookingOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this booking? This action cannot be undone.
+              {selectedBooking && (
+                <div className="mt-2 p-2 bg-neutral-100 rounded">
+                  <strong>{selectedBooking.bookingReference}</strong> - {formatCurrency(selectedBooking.totalAmount)}
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => selectedBooking && deleteBookingMutation.mutate(selectedBooking.id)}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete Booking
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
