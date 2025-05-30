@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Sidebar from "@/components/layout/Sidebar";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedHelipads from "@/components/home/FeaturedHelipads";
 import WhyChooseUs from "@/components/home/WhyChooseUs";
@@ -11,6 +12,7 @@ import CallToAction from "@/components/home/CallToAction";
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <Sidebar />
       <Header />
       <main className="flex-grow">
         <HeroSection />

@@ -1,100 +1,107 @@
-import { Link } from "wouter";
-import { X, Plane, Home, Info, Calendar, ClipboardList, HelpCircle } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Home,
+  Calendar,
+  BookOpen,
+  HelpCircle,
+  Info,
+  Menu,
+  X
+} from "lucide-react";
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+const navigationItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/booking", label: "Book Flight", icon: Calendar },
+  { href: "/my-bookings", label: "My Bookings", icon: BookOpen },
+  { href: "/about", label: "About", icon: Info },
+  { href: "/help", label: "Help Center", icon: HelpCircle },
+];
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { isAuthenticated, user } = useAuth();
+export default function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [location] = useLocation();
+
+  const NavItems = () => (
+    <div className="flex flex-col space-y-2 p-4">
+      {navigationItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = location === item.href;
+        
+        return (
+          <Link key={item.href} href={item.href}>
+            <Button
+              variant={isActive ? "default" : "ghost"}
+              className={`w-full justify-start text-left ${
+                isActive 
+                  ? "bg-primary text-primary-foreground" 
+                  : "hover:bg-accent hover:text-accent-foreground"
+              }`}
+              onClick={() => setIsOpen(false)}
+            >
+              <Icon className="h-4 w-4 mr-3" />
+              {item.label}
+            </Button>
+          </Link>
+        );
+      })}
+    </div>
+  );
 
   return (
-    <div
-      className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-neutral-800 shadow-lg transform ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      } transition-transform duration-300 ease-in-out md:hidden`}
-    >
-      <div className="p-4 border-b border-neutral-200 dark:border-neutral-700 flex justify-between items-center">
-        <div className="flex items-center">
-          <Plane className="h-6 w-6 text-primary mr-2" />
-          <h2 className="text-lg font-bold font-heading">Vayu Vihar</h2>
-        </div>
-        <button 
-          onClick={onClose} 
-          className="p-2"
-          aria-label="Close menu"
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm border shadow-lg hover:bg-white dark:hover:bg-neutral-800"
         >
-          <X className="h-5 w-5 text-neutral-700 dark:text-neutral-200" />
-        </button>
-      </div>
-      <nav className="p-4">
-        <ul className="space-y-3">
-          <li>
-            <Link 
-              href="/" 
-              className="flex items-center py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
+          <Menu className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      
+      <SheetContent 
+        side="left" 
+        className="w-80 p-0 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-r"
+      >
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">VV</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Vayu Vihar</h2>
+                <p className="text-xs text-muted-foreground">Helicopter Booking</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(false)}
+              className="h-8 w-8"
             >
-              <Home className="h-5 w-5 mr-2" />
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/about" 
-              className="flex items-center py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
-            >
-              <Info className="h-5 w-5 mr-2" />
-              About
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/booking" 
-              className="flex items-center py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
-            >
-              <Calendar className="h-5 w-5 mr-2" />
-              Booking
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/my-bookings" 
-              className="flex items-center py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
-            >
-              <ClipboardList className="h-5 w-5 mr-2" />
-              My Bookings
-            </Link>
-          </li>
-          <li>
-            <Link 
-              href="/help" 
-              className="flex items-center py-2 px-3 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              onClick={onClose}
-            >
-              <HelpCircle className="h-5 w-5 mr-2" />
-              Help Center
-            </Link>
-          </li>
-          
-          {isAuthenticated && user?.role === 'admin' && (
-            <li className="pt-2 mt-2 border-t border-neutral-200 dark:border-neutral-700">
-              <Link 
-                href="/admin" 
-                className="flex items-center py-2 px-3 rounded-md bg-primary text-white"
-                onClick={onClose}
-              >
-                Admin Dashboard
-              </Link>
-            </li>
-          )}
-        </ul>
-      </nav>
-    </div>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Navigation Items */}
+          <div className="flex-1 overflow-y-auto">
+            <NavItems />
+          </div>
+
+          {/* Footer */}
+          <div className="border-t p-4">
+            <div className="text-center text-sm text-muted-foreground">
+              <p>&copy; 2024 Vayu Vihar</p>
+              <p>Premium Helicopter Services</p>
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
