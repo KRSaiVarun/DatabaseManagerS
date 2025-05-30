@@ -110,12 +110,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'This account requires social login' });
       }
       
-      console.log('Login attempt for:', email);
-      console.log('Password provided length:', password.length);
-      console.log('Stored password hash exists:', !!user.password);
+      let isPasswordValid = false;
       
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      console.log('Password validation result:', isPasswordValid);
+      // Check if password is hashed (bcrypt hashes start with $2b$)
+      if (user.password.startsWith('$2b$')) {
+        // Password is hashed, use bcrypt compare
+        isPasswordValid = await bcrypt.compare(password, user.password);
+      } else {
+        // Password is plain text (legacy users), compare directly
+        isPasswordValid = password === user.password;
+        
+        // If login is successful with plain text, hash and update the password
+        if (isPasswordValid) {
+          const saltRounds = 12;
+          const hashedPassword = await bcrypt.hash(password, saltRounds);
+          await storage.updateUser(user.id, { password: hashedPassword });
+        }
+      }
       
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid email or password' });
