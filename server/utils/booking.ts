@@ -19,12 +19,10 @@ export async function createPredefinedBooking(userId: number, bookingData: any) 
     throw new Error('Route not found');
   }
   
-  // Get source and destination helipads
-  const sourceHelipad = await storage.getHelipad(route.sourceHelipadId);
-  const destHelipad = await storage.getHelipad(route.destinationHelipadId);
-  
-  if (!sourceHelipad || !destHelipad) {
-    throw new Error('Helipad not found');
+  // For predefined routes, we'll use the route locations directly
+  // Note: This route might not have specific helipad IDs but has source/destination locations
+  if (!route.sourceLocation || !route.destinationLocation) {
+    throw new Error('Route locations not properly defined');
   }
   
   // Calculate booking date (combine date and time)
@@ -38,17 +36,17 @@ export async function createPredefinedBooking(userId: number, bookingData: any) 
   // Create booking
   const booking: InsertBooking = {
     userId,
-    pickupHelipadId: sourceHelipad.id,
-    dropHelipadId: destHelipad.id,
-    customPickupLocation: null,
-    customDropLocation: null,
+    pickupHelipadId: null,
+    dropHelipadId: null,
+    customPickupLocation: route.sourceLocation,
+    customDropLocation: route.destinationLocation,
     bookingType: 'predefined',
     bookingDate: bookingDateTime,
     passengers,
     duration: route.duration,
     totalAmount,
     paymentStatus: false,
-    bookingStatus: 'pending',
+    bookingStatus: 'confirmed',
     bookingReference: generateBookingReference(),
   };
   
@@ -104,7 +102,7 @@ export async function createCustomBooking(userId: number, bookingData: any) {
     duration,
     totalAmount,
     paymentStatus: false,
-    bookingStatus: 'pending',
+    bookingStatus: 'confirmed',
     bookingReference: generateBookingReference(),
   };
   
