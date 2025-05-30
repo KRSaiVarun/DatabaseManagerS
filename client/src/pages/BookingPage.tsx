@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 import AuthModal from "@/components/auth/AuthModal";
+import Header from "@/components/layout/Header";
 
 import {
   Card,
@@ -165,6 +166,7 @@ export default function BookingPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">
+        <Header />
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-md mx-auto">
             <div className="text-center mb-8">
@@ -251,9 +253,11 @@ export default function BookingPage() {
   };
 
   const renderBookingForm = () => (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <Card>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Card>
           <CardHeader>
             <CardTitle className="text-2xl">Book Your Helicopter</CardTitle>
             <CardDescription>
@@ -528,12 +532,15 @@ export default function BookingPage() {
             </Form>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );
 
   const renderUpiPayment = () => (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-neutral-900 dark:to-neutral-800">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader className="text-center">
