@@ -30,8 +30,8 @@ const loginSchema = z.object({
     .email("Invalid email address")
     .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email format"),
   password: z.string()
-    .min(6, "Password must be at least 6 characters")
-    .max(50, "Password must be less than 50 characters"),
+    .min(1, "Password is required")
+    .max(100, "Password is too long"),
 });
 
 const registerSchema = z.object({
