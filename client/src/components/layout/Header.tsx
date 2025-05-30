@@ -35,7 +35,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white dark:bg-neutral-800 shadow-md">
+      <header className="sticky top-0 z-30 bg-white dark:bg-neutral-800 shadow-md" style={{ paddingLeft: '60px' }}>
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16">
             {/* Logo & Title */}

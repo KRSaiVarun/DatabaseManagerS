@@ -56,7 +56,7 @@ export default function Sidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className="fixed top-4 left-4 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm border shadow-lg hover:bg-white dark:hover:bg-neutral-800"
+          className="fixed top-4 left-4 z-40 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-sm border shadow-lg hover:bg-white dark:hover:bg-neutral-800"
         >
           <Menu className="h-5 w-5" />
         </Button>
