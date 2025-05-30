@@ -31,6 +31,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -59,6 +69,8 @@ import {
   Route,
   Settings,
   Globe,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
 interface DashboardStats {
@@ -110,6 +122,14 @@ export default function AdminDashboard() {
   const [isAddRouteOpen, setIsAddRouteOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isViewUserOpen, setIsViewUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
+  const [isViewBookingOpen, setIsViewBookingOpen] = useState(false);
+  const [isEditBookingOpen, setIsEditBookingOpen] = useState(false);
+  const [isDeleteBookingOpen, setIsDeleteBookingOpen] = useState(false);
+  const [editUserData, setEditUserData] = useState<Partial<User>>({});
+  const [editBookingData, setEditBookingData] = useState<Partial<Booking>>({});
   const { toast } = useToast();
 
   // Route form state
@@ -179,6 +199,147 @@ export default function AdminDashboard() {
       });
     },
   });
+
+  // User CRUD mutations
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: { id: number; data: Partial<User> }) => {
+      const response = await apiRequest(`/api/admin/users/${userData.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(userData.data),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User updated",
+        description: "User information has been successfully updated.",
+      });
+      setIsEditUserOpen(false);
+      setSelectedUser(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await apiRequest(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      toast({
+        title: "User deleted",
+        description: "User has been successfully removed.",
+      });
+      setIsDeleteUserOpen(false);
+      setSelectedUser(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Booking CRUD mutations
+  const updateBookingMutation = useMutation({
+    mutationFn: async (bookingData: { id: number; data: Partial<Booking> }) => {
+      const response = await apiRequest(`/api/admin/bookings/${bookingData.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(bookingData.data),
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
+      toast({
+        title: "Booking updated",
+        description: "Booking information has been successfully updated.",
+      });
+      setIsEditBookingOpen(false);
+      setSelectedBooking(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update booking",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteBookingMutation = useMutation({
+    mutationFn: async (bookingId: number) => {
+      const response = await apiRequest(`/api/admin/bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
+      toast({
+        title: "Booking deleted",
+        description: "Booking has been successfully removed.",
+      });
+      setIsDeleteBookingOpen(false);
+      setSelectedBooking(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete booking",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // CRUD handlers
+  const handleViewUser = (user: User) => {
+    setSelectedUser(user);
+    setIsViewUserOpen(true);
+  };
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setEditUserData({ name: user.name, email: user.email, phone: user.phone });
+    setIsEditUserOpen(true);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user);
+    setIsDeleteUserOpen(true);
+  };
+
+  const handleViewBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsViewBookingOpen(true);
+  };
+
+  const handleEditBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setEditBookingData({ 
+      bookingStatus: booking.bookingStatus,
+      totalAmount: booking.totalAmount,
+      passengers: booking.passengers 
+    });
+    setIsEditBookingOpen(true);
+  };
+
+  const handleDeleteBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsDeleteBookingOpen(true);
+  };
 
   const handleLogout = async () => {
     await logoutUser();
@@ -531,14 +692,32 @@ export default function AdminDashboard() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedUser(user)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewUser(user)}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditUser(user)}
+                              >
+                                <Edit className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteUser(user)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

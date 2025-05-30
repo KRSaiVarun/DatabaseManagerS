@@ -90,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Admin login successful",
         description: `Welcome to the admin dashboard, ${userData.name}!`,
       });
+      // Redirect admin directly to dashboard
+      window.location.href = '/admin/dashboard';
       return true;
     } catch (error) {
       toast({
