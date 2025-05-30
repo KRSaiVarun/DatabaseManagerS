@@ -863,6 +863,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: 'Failed to delete user' });
     }
   });
+
+  // Admin: Update booking
+  app.patch('/api/admin/bookings/:id', requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      const bookingData = req.body;
+      
+      // Check if booking exists
+      const existingBooking = await storage.getBooking(bookingId);
+      if (!existingBooking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      
+      // Update booking using database query
+      const [updatedBooking] = await db
+        .update(bookings)
+        .set(bookingData)
+        .where(eq(bookings.id, bookingId))
+        .returning();
+      
+      res.json(updatedBooking);
+    } catch (error) {
+      console.error('Failed to update booking:', error);
+      res.status(500).json({ message: 'Failed to update booking' });
+    }
+  });
+
+  // Admin: Delete booking
+  app.delete('/api/admin/bookings/:id', requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const bookingId = parseInt(req.params.id);
+      
+      // Check if booking exists
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: 'Booking not found' });
+      }
+      
+      // Delete booking using database query
+      await db.delete(bookings).where(eq(bookings.id, bookingId));
+      
+      res.json({ message: 'Booking deleted successfully' });
+    } catch (error) {
+      console.error('Failed to delete booking:', error);
+      res.status(500).json({ message: 'Failed to delete booking' });
+    }
+  });
   
   // Admin: Get dashboard statistics
   app.get('/api/admin/statistics', requireAdmin, async (req: Request, res: Response) => {
