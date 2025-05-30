@@ -1,6 +1,9 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
+import { users, bookings, helipads } from "@shared/schema";
+import { sql, eq } from "drizzle-orm";
 import { z } from "zod";
 import { 
   userRegistrationSchema, 
@@ -789,13 +792,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Get all users
   app.get('/api/admin/users', requireAdmin, async (req: Request, res: Response) => {
     try {
-      // In a real app, you'd implement a method to get all users
-      // For now, we'll return a mock response
-      res.json([
-        { id: 1, name: 'John Doe', email: 'john@example.com', role: 'user' },
-        { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'user' },
-        { id: 3, name: 'Admin User', email: 'admin@example.com', role: 'admin' },
-      ]);
+      const allUsers = await db.select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        role: users.role,
+        createdAt: users.createdAt,
+      }).from(users);
+      
+      res.json(allUsers);
     } catch (error) {
       console.error('Admin get users error:', error);
       res.status(500).json({ message: 'Failed to fetch users' });
@@ -805,14 +811,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Get dashboard statistics
   app.get('/api/admin/statistics', requireAdmin, async (req: Request, res: Response) => {
     try {
-      // In a real app, you'd calculate these statistics from the database
-      // For now, we'll return mock data
+      // Get real counts from database
+      const [totalUsersResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(users);
+      const [totalBookingsResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(bookings);
+      const [totalHelipadsResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(helipads);
+      const [pendingBookingsResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(bookings).where(eq(bookings.bookingStatus, 'pending'));
+      
+      // Calculate total revenue from completed bookings
+      const [revenueResult] = await db.select({ 
+        total: sql`sum(${bookings.totalAmount})`.mapWith(Number) 
+      }).from(bookings).where(eq(bookings.bookingStatus, 'completed'));
+      
       res.json({
-        totalBookings: 547,
-        totalRevenue: 8250000, // in paisa (₹82,500)
-        totalUsers: 320,
-        totalHelipads: 15,
-        pendingBookings: 8,
+        totalBookings: totalBookingsResult.count,
+        totalRevenue: revenueResult.total || 0,
+        totalUsers: totalUsersResult.count,
+        totalHelipads: totalHelipadsResult.count,
+        pendingBookings: pendingBookingsResult.count,
       });
     } catch (error) {
       console.error('Admin get statistics error:', error);
