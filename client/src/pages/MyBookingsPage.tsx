@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Booking } from "@shared/schema";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Sidebar from "@/components/layout/Sidebar";
 import BookingsList from "@/components/my-bookings/BookingsList";
 import BookingDetails from "@/components/my-bookings/BookingDetails";
 import { useAuth } from "@/context/AuthContext";
@@ -37,6 +38,7 @@ export default function MyBookingsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
+        <Sidebar />
         <Header />
         <main className="flex-grow flex items-center justify-center">
           <div className="animate-pulse flex space-x-2">
@@ -53,6 +55,7 @@ export default function MyBookingsPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col">
+        <Sidebar />
         <Header />
         <main className="flex-grow py-16 bg-neutral-50 dark:bg-neutral-900">
           <div className="container mx-auto px-4">

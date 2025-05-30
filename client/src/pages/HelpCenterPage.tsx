@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Sidebar from "@/components/layout/Sidebar";
 import FAQ from "@/components/help/FAQ";
 import ContactForm from "@/components/help/ContactForm";
 import Chatbot from "@/components/help/Chatbot";
@@ -14,6 +15,7 @@ export default function HelpCenterPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Sidebar />
       <Header />
       <main className="flex-grow">
         {/* Hero section */}
