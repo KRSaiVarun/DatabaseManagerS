@@ -6,7 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getUniqueLocations } from "@/lib/utils";
 import AuthModal from "@/components/auth/AuthModal";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
@@ -289,11 +289,7 @@ export default function BookingPage() {
                           />
                         </FormControl>
                         <datalist id="from-locations">
-                          {/* Unique locations from both helipads and routes */}
-                          {Array.from(new Set([
-                            ...(helipads?.map(h => h.name) || []),
-                            ...(routes?.map(r => r.sourceLocation) || [])
-                          ])).map((location, index) => (
+                          {getUniqueLocations(helipads || [], routes || []).map((location, index) => (
                             <option key={`from-${index}`} value={location} />
                           ))}
                         </datalist>

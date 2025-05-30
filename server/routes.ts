@@ -432,10 +432,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'All fields are required' });
       }
       
+      // Check for duplicate routes with same source and destination
+      const existingRoutes = await storage.getAllRoutes();
+      const duplicateRoute = existingRoutes.find(route => 
+        route.sourceLocation.toLowerCase().trim() === sourceLocation.toLowerCase().trim() &&
+        route.destinationLocation.toLowerCase().trim() === destinationLocation.toLowerCase().trim()
+      );
+      
+      if (duplicateRoute) {
+        return res.status(400).json({ 
+          message: `A route from ${sourceLocation} to ${destinationLocation} already exists` 
+        });
+      }
+      
       const route = await storage.createRoute({
-        name,
-        sourceLocation,
-        destinationLocation,
+        name: name.trim(),
+        sourceLocation: sourceLocation.trim(),
+        destinationLocation: destinationLocation.trim(),
         basePrice,
         duration,
         distance,
@@ -481,7 +494,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create booking with correct field names
       const bookingDateTime = new Date(`${requestBookingDate}T${bookingTime}`);
-      const bookingReference = `VV${Date.now().toString().slice(-6)}`;
+      
+      // Generate unique booking reference
+      let bookingReference;
+      let isUnique = false;
+      let attempts = 0;
+      
+      while (!isUnique && attempts < 10) {
+        const timestamp = Date.now();
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        bookingReference = `VV${timestamp.toString().slice(-6)}${random}`;
+        
+        const existingBooking = await storage.getBookingByReference(bookingReference);
+        if (!existingBooking) {
+          isUnique = true;
+        }
+        attempts++;
+      }
+      
+      if (!isUnique) {
+        return res.status(500).json({ message: 'Unable to generate unique booking reference' });
+      }
       
       const booking = await storage.createBooking({
         userId,
@@ -675,7 +708,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Create helipad
   app.post('/api/admin/helipads', requireAdmin, async (req: Request, res: Response) => {
     try {
-      const helipad = await storage.createHelipad(req.body);
+      const { name, location, ...otherData } = req.body;
+      
+      if (!name || !location) {
+        return res.status(400).json({ message: 'Name and location are required' });
+      }
+      
+      // Check for duplicate helipads with same name and location
+      const existingHelipads = await storage.getAllHelipads();
+      const duplicateHelipad = existingHelipads.find(helipad => 
+        helipad.name.toLowerCase().trim() === name.toLowerCase().trim() &&
+        helipad.location.toLowerCase().trim() === location.toLowerCase().trim()
+      );
+      
+      if (duplicateHelipad) {
+        return res.status(400).json({ 
+          message: `A helipad named "${name}" at ${location} already exists` 
+        });
+      }
+      
+      const helipad = await storage.createHelipad({
+        name: name.trim(),
+        location: location.trim(),
+        ...otherData
+      });
+      
       res.status(201).json(helipad);
     } catch (error) {
       console.error('Admin create helipad error:', error);

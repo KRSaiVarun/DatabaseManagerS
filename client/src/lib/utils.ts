@@ -93,3 +93,41 @@ export function isValidEmail(email: string): boolean {
 export function isValidPhone(phone: string): boolean {
   return /^[6-9]\d{9}$/.test(phone); // Indian mobile number validation
 }
+
+// Duplicate removal utilities
+export function removeDuplicates<T>(array: T[]): T[] {
+  return Array.from(new Set(array));
+}
+
+export function removeDuplicateObjects<T>(array: T[], key: keyof T): T[] {
+  const seen = new Set();
+  return array.filter(item => {
+    const duplicate = seen.has(item[key]);
+    seen.add(item[key]);
+    return !duplicate;
+  });
+}
+
+export function removeDuplicateStrings(array: string[]): string[] {
+  return Array.from(new Set(array.map(str => str.trim().toLowerCase())))
+    .map(str => array.find(original => original.trim().toLowerCase() === str))
+    .filter(Boolean) as string[];
+}
+
+export function getUniqueLocations(helipads: any[], routes: any[]): string[] {
+  const locations = [
+    ...(helipads?.map(h => h.name) || []),
+    ...(routes?.map(r => r.sourceLocation) || []),
+    ...(routes?.map(r => r.destinationLocation) || [])
+  ];
+  
+  return removeDuplicateStrings(locations.filter(Boolean));
+}
+
+export function sanitizeAndDeduplicate(strings: string[]): string[] {
+  return removeDuplicateStrings(
+    strings
+      .map(str => str?.trim())
+      .filter(str => str && str.length > 0)
+  );
+}
