@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@shared/schema';
 import { getCurrentUser, loginUser, registerUser, logout, adminLogin, socialLogin } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 
 type AuthContextType = {
   user: User | null;
@@ -22,6 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     async function loadUser() {
@@ -135,6 +139,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await logout();
       setUser(null);
+      // Clear all cached data to prevent data leakage between users
+      queryClient.clear();
       toast({
         title: "Logged out",
         description: "You have been successfully logged out",
