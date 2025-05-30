@@ -84,6 +84,7 @@ export default function MyBookingsPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Sidebar />
       <Header />
       <main className="flex-grow py-12 bg-neutral-50 dark:bg-neutral-900">
         <div className="container mx-auto px-4">
