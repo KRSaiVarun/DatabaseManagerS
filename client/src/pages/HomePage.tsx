@@ -8,6 +8,7 @@ import LuxuryFleet from "@/components/home/LuxuryFleet";
 import Partners from "@/components/home/Partners";
 import Testimonials from "@/components/home/Testimonials";
 import CallToAction from "@/components/home/CallToAction";
+import BookingSection from "@/components/booking/BookingSection";
 
 export default function HomePage() {
   return (
@@ -16,6 +17,7 @@ export default function HomePage() {
       <Header />
       <main className="flex-grow">
         <HeroSection />
+        <BookingSection />
         <FeaturedHelipads />
         <WhyChooseUs />
         <LuxuryFleet />
