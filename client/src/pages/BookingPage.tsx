@@ -289,7 +289,7 @@ export default function BookingPage() {
                           />
                         </FormControl>
                         <datalist id="from-locations">
-                          {getUniqueLocations(helipads || [], routes || []).map((location, index) => (
+                          {(routes || []).map(route => route.sourceLocation).filter((location, index, self) => self.indexOf(location) === index).map((location, index) => (
                             <option key={`from-${index}`} value={location} />
                           ))}
                         </datalist>
@@ -315,7 +315,7 @@ export default function BookingPage() {
                           />
                         </FormControl>
                         <datalist id="to-locations">
-                          {getUniqueLocations(helipads || [], routes || []).map((location, index) => (
+                          {(routes || []).map(route => route.destinationLocation).filter((location, index, self) => self.indexOf(location) === index).map((location, index) => (
                             <option key={`to-${index}`} value={location} />
                           ))}
                         </datalist>

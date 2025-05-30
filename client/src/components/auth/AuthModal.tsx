@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { X, Facebook } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebook } from "react-icons/fa";
+import { X, Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -228,37 +226,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </form>
               </Form>
 
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white dark:bg-neutral-800 text-neutral-500">
-                    or continue with
-                  </span>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleGoogleLogin}
-                  className="flex items-center justify-center"
-                >
-                  <FcGoogle className="mr-2 h-4 w-4" />
-                  Google
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleFacebookLogin}
-                  className="flex items-center justify-center"
-                >
-                  <FaFacebook className="mr-2 h-4 w-4 text-blue-600" />
-                  Facebook
-                </Button>
-              </div>
             </TabsContent>
 
             <TabsContent value="signup">

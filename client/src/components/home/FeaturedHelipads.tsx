@@ -121,15 +121,7 @@ export default function FeaturedHelipads() {
           )}
         </div>
         
-        <div className="text-center mt-10">
-          <Button 
-            variant="outline" 
-            className="px-6 py-3 border-primary text-primary hover:bg-primary hover:text-white"
-            onClick={() => window.location.href = "/helipads"}
-          >
-            View All Helipads
-          </Button>
-        </div>
+
       </div>
     </section>
   );
