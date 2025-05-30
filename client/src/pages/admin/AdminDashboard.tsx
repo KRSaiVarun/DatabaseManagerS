@@ -239,6 +239,8 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/statistics'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
       toast({
         title: "User deleted",
         description: "User has been successfully removed.",
@@ -294,6 +296,7 @@ export default function AdminDashboard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/statistics'] });
       toast({
         title: "Booking deleted",
         description: "Booking has been successfully removed.",
