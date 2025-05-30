@@ -48,7 +48,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -67,11 +67,12 @@ export default function ProfilePage() {
       const res = await apiRequest('PATCH', '/api/auth/profile', data);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast({
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       });
+      await refreshUser();
       queryClient.invalidateQueries({ queryKey: ['/api/auth/me'] });
       setIsEditing(false);
     },

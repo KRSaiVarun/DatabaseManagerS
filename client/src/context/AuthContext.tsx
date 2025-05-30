@@ -12,6 +12,7 @@ type AuthContextType = {
   register: (name: string, email: string, phone: string, password: string, confirmPassword: string) => Promise<boolean>;
   adminLogin: (email: string, password: string) => Promise<boolean>;
   socialLoginHandler: (provider: 'google' | 'facebook', token: string) => Promise<boolean>;
+  refreshUser: () => Promise<void>;
   logoutUser: () => Promise<void>;
 };
 
@@ -119,6 +120,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const refreshedUser = await getCurrentUser();
+      setUser(refreshedUser);
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const logoutUser = async (): Promise<void> => {
     try {
       await logout();
@@ -145,6 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     register,
     adminLogin: adminLoginHandler,
     socialLoginHandler,
+    refreshUser,
     logoutUser,
   };
 

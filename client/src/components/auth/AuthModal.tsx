@@ -132,6 +132,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const success = await adminLogin(data.email, data.password);
     if (success) {
       onClose();
+      // Redirect to admin dashboard
+      window.location.href = '/admin';
     }
   };
 
