@@ -60,12 +60,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'User with this email already exists' });
       }
       
+      // Hash password
+      const saltRounds = 12;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      
       // Create new user
       const user = await storage.createUser({
+        name: userData.name,
         email,
-        password,
-        ...userData,
+        phone: userData.phone || null,
+        password: hashedPassword,
         role: 'user',
+        authProvider: null,
+        authProviderId: null,
       });
       
       // Set session data

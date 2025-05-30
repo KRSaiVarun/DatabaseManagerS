@@ -116,37 +116,85 @@ export const insertTestimonialSchema = createInsertSchema(testimonials).omit({ i
 
 // Extended schemas with validation
 export const userLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address")
+    .max(255, "Email is too long"),
+  password: z.string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password is too long"),
 });
 
-export const userRegistrationSchema = insertUserSchema.extend({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
+export const userRegistrationSchema = z.object({
+  name: z.string()
+    .min(1, "Name is required")
+    .min(2, "Name must be at least 2 characters")
+    .max(100, "Name is too long")
+    .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces"),
+  email: z.string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address")
+    .max(255, "Email is too long"),
+  phone: z.string()
+    .min(1, "Phone number is required")
+    .regex(/^[+]?[\d\s-()]{10,15}$/, "Please enter a valid phone number")
+    .optional(),
+  password: z.string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password is too long")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
+  confirmPassword: z.string()
+    .min(1, "Please confirm your password"),
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"]
+  path: ["confirmPassword"],
 });
 
 export const adminLoginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address"),
+  password: z.string()
+    .min(1, "Password is required")
+    .min(6, "Password must be at least 6 characters"),
 });
 
 export const predefinedBookingSchema = z.object({
-  routeId: z.number(),
-  bookingDate: z.string(),
-  bookingTime: z.string(),
-  passengers: z.number().min(1).max(10),
+  routeId: z.number()
+    .min(1, "Please select a valid route"),
+  bookingDate: z.string()
+    .min(1, "Booking date is required")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Please enter a valid date"),
+  bookingTime: z.string()
+    .min(1, "Booking time is required")
+    .regex(/^\d{2}:\d{2}$/, "Please enter a valid time"),
+  passengers: z.number()
+    .min(1, "At least 1 passenger is required")
+    .max(10, "Maximum 10 passengers allowed"),
 });
 
 export const customBookingSchema = z.object({
-  pickupLocation: z.string().min(5, "Please enter a valid pickup location"),
-  dropLocation: z.string().min(5, "Please enter a valid drop location"),
-  bookingDate: z.string(),
-  bookingTime: z.string(),
-  passengers: z.number().min(1).max(10),
-  helicopterId: z.number(),
+  pickupLocation: z.string()
+    .min(1, "Pickup location is required")
+    .min(3, "Pickup location must be at least 3 characters")
+    .max(200, "Pickup location is too long"),
+  dropLocation: z.string()
+    .min(1, "Drop location is required")
+    .min(3, "Drop location must be at least 3 characters")
+    .max(200, "Drop location is too long"),
+  bookingDate: z.string()
+    .min(1, "Booking date is required")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Please enter a valid date"),
+  bookingTime: z.string()
+    .min(1, "Booking time is required")
+    .regex(/^\d{2}:\d{2}$/, "Please enter a valid time"),
+  passengers: z.number()
+    .min(1, "At least 1 passenger is required")
+    .max(10, "Maximum 10 passengers allowed"),
+  helicopterId: z.number()
+    .min(1, "Please select a valid helicopter"),
 });
 
 // Export types
