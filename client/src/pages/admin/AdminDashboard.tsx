@@ -58,6 +58,7 @@ import {
   Eye,
   Route,
   Settings,
+  Globe,
 } from "lucide-react";
 
 interface DashboardStats {
@@ -232,10 +233,16 @@ export default function AdminDashboard() {
               <Plane className="h-8 w-8 text-primary mr-3" />
               <h1 className="text-xl font-bold">Vayu Vihar Admin</h1>
             </div>
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button variant="outline" onClick={() => window.location.href = '/'}>
+                <Globe className="h-4 w-4 mr-2" />
+                View Site
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
