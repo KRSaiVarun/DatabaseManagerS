@@ -110,7 +110,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'This account requires social login' });
       }
       
+      console.log('Login attempt for:', email);
+      console.log('Password provided length:', password.length);
+      console.log('Stored password hash exists:', !!user.password);
+      
       const isPasswordValid = await bcrypt.compare(password, user.password);
+      console.log('Password validation result:', isPasswordValid);
+      
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Invalid email or password' });
       }
