@@ -934,10 +934,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const [totalHelipadsResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(helipads);
       const [pendingBookingsResult] = await db.select({ count: sql`count(*)`.mapWith(Number) }).from(bookings).where(eq(bookings.bookingStatus, 'pending'));
       
-      // Calculate total revenue from confirmed and completed bookings
+      // Calculate total revenue from confirmed and completed bookings only (authentic user bookings)
       const [revenueResult] = await db.select({ 
-        total: sql`sum(${bookings.totalAmount})`.mapWith(Number) 
-      }).from(bookings).where(sql`${bookings.bookingStatus} IN ('confirmed', 'completed')`);
+        total: sql`COALESCE(sum(${bookings.totalAmount}), 0)`.mapWith(Number) 
+      }).from(bookings).where(sql`${bookings.bookingStatus} IN ('confirmed', 'completed') AND ${bookings.userId} IS NOT NULL`);
       
       res.json({
         totalBookings: totalBookingsResult.count,
