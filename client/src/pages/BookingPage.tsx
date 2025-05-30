@@ -315,11 +315,7 @@ export default function BookingPage() {
                           />
                         </FormControl>
                         <datalist id="to-locations">
-                          {/* Unique locations from both helipads and routes */}
-                          {Array.from(new Set([
-                            ...(helipads?.map(h => h.name) || []),
-                            ...(routes?.map(r => r.destinationLocation) || [])
-                          ])).map((location, index) => (
+                          {getUniqueLocations(helipads || [], routes || []).map((location, index) => (
                             <option key={`to-${index}`} value={location} />
                           ))}
                         </datalist>
