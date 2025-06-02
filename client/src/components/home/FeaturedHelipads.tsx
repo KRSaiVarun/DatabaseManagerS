@@ -7,46 +7,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star } from "lucide-react";
 import { formatCurrency, scrollToElement } from "@/lib/utils";
 
-// Placeholder data for initial rendering
-const placeholderHelipads: Partial<Helipad>[] = [
-  {
-    id: 1,
-    name: "Kempegowda Helipad",
-    location: "Central Bangalore",
-    description: "Central Bangalore, perfect for city tours and business travel.",
-    imageUrl: "https://images.unsplash.com/photo-1564519263736-9fa8b54b9a28?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    pricePerHour: 1200000, // in paisa (₹12,000)
-  },
-  {
-    id: 2,
-    name: "Electronic City Helipad",
-    location: "Electronic City",
-    description: "Ideal for tech professionals and quick corporate transfers.",
-    imageUrl: "https://images.unsplash.com/photo-1601221963958-55233d5977ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    pricePerHour: 1050000, // in paisa (₹10,500)
-  },
-  {
-    id: 3,
-    name: "Whitefield Luxury Helipad",
-    location: "Whitefield",
-    description: "Premium location with exclusive facilities and lounge access.",
-    imageUrl: "https://images.unsplash.com/photo-1514919818404-1cca07c5414f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    pricePerHour: 1500000, // in paisa (₹15,000)
-  },
-];
+// Location photos for different areas in Bangalore
+const locationImages = {
+  "Brigade Road": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "Electronic City": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "Whitefield": "https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  "Airport": "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+};
+
+// Helper function to get location image
+const getLocationImage = (location: string): string => {
+  for (const [key, image] of Object.entries(locationImages)) {
+    if (location.includes(key)) {
+      return image;
+    }
+  }
+  return locationImages["Brigade Road"]; // Default fallback
+};
 
 export default function FeaturedHelipads() {
-  const [helipads, setHelipads] = useState<Partial<Helipad>[]>(placeholderHelipads);
-
-  const { data, isLoading, error } = useQuery<Helipad[]>({
+  const { data: helipads, isLoading, error } = useQuery<Helipad[]>({
     queryKey: ['/api/helipads/featured'],
   });
-
-  useEffect(() => {
-    if (data) {
-      setHelipads(data);
-    }
-  }, [data]);
 
   const handleBookHelipad = () => {
     scrollToElement("booking");
@@ -84,11 +66,11 @@ export default function FeaturedHelipads() {
               Failed to load helipads. Please try again later.
             </div>
           ) : (
-            helipads.map((helipad) => (
+            (helipads || []).map((helipad) => (
               <Card key={helipad.id} className="bg-white dark:bg-neutral-800 overflow-hidden shadow-md hover:shadow-lg transition">
                 <div className="h-48 overflow-hidden">
                   <img 
-                    src={helipad.imageUrl} 
+                    src={helipad.imageUrl ?? getLocationImage(helipad.location || "")} 
                     alt={helipad.name} 
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
@@ -102,7 +84,7 @@ export default function FeaturedHelipads() {
                     <div className="flex items-center">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
                       <span className="text-sm">
-                        {helipad.rating || "4.8"} ({helipad.reviewCount || "120"} reviews)
+                        4.8 (120 reviews)
                       </span>
                     </div>
                     <div className="text-primary font-semibold">
