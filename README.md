@@ -2,7 +2,6 @@
 
 Vayu Vihara is a full-stack web application that enables real-time helicopter bookings from Bengaluru Airport (BLR) to approved helipads across the city. Designed for luxury, speed, and convenience, the platform provides seamless air travel experiences.
 
-![App Screenshot](https://via.placeholder.com/1200x400.png?text=Vayu+Vihara+Preview)
 
 ---
 
