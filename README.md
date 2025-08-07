@@ -81,14 +81,6 @@ Visit `http://localhost:3000` to view the app.
 
 ---
 
-## 📸 UI Snapshots
-
-| Booking Page | Admin Dashboard |
-|--------------|------------------|
-| ![Booking](https://via.placeholder.com/400x200.png?text=Booking+Page) | ![Admin](https://via.placeholder.com/400x200.png?text=Admin+Dashboard) |
-
----
-
 ## 🚀 Future Improvements
 
 - 🌐 Multi-language support
